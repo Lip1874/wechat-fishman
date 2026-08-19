@@ -18,62 +18,117 @@ page{
   align-items: center;
   justify-content: space-between;
   flex-shrink: 0;
-  background: linear-gradient(135deg, #0aa55e 0%, #008844 100%);
-  padding: 44rpx 32rpx 36rpx;
+  background: linear-gradient(135deg, #19c56f 0%, #0aa55e 42%, #00723a 100%);
+  padding: 48rpx 32rpx 52rpx;
+  border-radius: 0 0 44rpx 44rpx;
   overflow: hidden;
 }
 .header-deco{
   position: absolute;
   right: -90rpx;
   top: -90rpx;
-  width: 280rpx;
-  height: 280rpx;
+  width: 300rpx;
+  height: 300rpx;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.09);
 }
 .header-deco2{
   position: absolute;
-  right: 150rpx;
+  right: 160rpx;
   bottom: -70rpx;
-  width: 200rpx;
-  height: 200rpx;
+  width: 220rpx;
+  height: 220rpx;
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+}
+/* 漂浮气泡装饰 */
+.bubble{
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  animation: float 6s ease-in-out infinite;
+}
+.b1{ width: 48rpx; height: 48rpx; right: 150rpx; top: 66rpx; }
+.b2{ width: 28rpx; height: 28rpx; right: 220rpx; top: 116rpx; animation-delay: 2s; }
+.b3{ width: 20rpx; height: 20rpx; right: 76rpx; top: 156rpx; animation-delay: 4s; }
+@keyframes float{
+  0%, 100%{ transform: translateY(0); }
+  50%{ transform: translateY(-16rpx); }
+}
+/* 底部波浪装饰 */
+.header-wave{
+  position: absolute;
+  left: -10%;
+  width: 120%;
+  bottom: -14rpx;
+  height: 46rpx;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  background: rgba(255, 255, 255, 0.12);
+}
+.header-wave2{
+  position: absolute;
+  left: -25%;
+  width: 150%;
+  bottom: -36rpx;
+  height: 62rpx;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
   background: rgba(255, 255, 255, 0.06);
 }
 .header-left{
   position: relative;
   z-index: 1;
 }
+.header-title-row{
+  display: flex;
+  align-items: center;
+}
+.header-icon{
+  flex-shrink: 0;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.22);
+  border: 2rpx solid rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34rpx;
+  margin-right: 18rpx;
+  box-shadow: 0 6rpx 16rpx rgba(0, 60, 30, 0.15);
+}
 .header-title{
   color: #fff;
-  font-size: 42rpx;
-  font-weight: 700;
+  font-size: 40rpx;
+  font-weight: 800;
+  letter-spacing: 1rpx;
 }
 .header-sub{
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(255, 255, 255, 0.82);
   font-size: 24rpx;
-  margin-top: 10rpx;
+  margin-top: 12rpx;
+  margin-left: 82rpx;
 }
 .header-btns{
   position: relative;
-  z-index: 1;
+  z-index: 2;
   flex-shrink: 0;
   display: flex;
   gap: 14rpx;
 }
 .map-btn{
   position: relative;
-  z-index: 1;
+  z-index: 2;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.16);
-  border: 2rpx solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.18);
+  border: 2rpx solid rgba(255, 255, 255, 0.5);
   color: #fff;
   font-size: 26rpx;
   font-weight: 600;
   padding: 16rpx 28rpx;
   border-radius: 44rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 60, 30, 0.18);
 }
 .map-btn-hover{
   opacity: 0.85;
@@ -87,11 +142,11 @@ page{
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  margin: -36rpx 24rpx 0;
+  margin: -40rpx 24rpx 0;
   background: #fff;
-  border-radius: 24rpx;
-  padding: 14rpx 14rpx 14rpx 22rpx;
-  box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.07);
+  border-radius: 32rpx;
+  padding: 12rpx 12rpx 12rpx 20rpx;
+  box-shadow: 0 14rpx 36rpx rgba(0, 0, 0, 0.08);
 }
 .mode-scroll{
   flex: 1;
@@ -115,10 +170,11 @@ page{
   white-space: nowrap;
 }
 .mode-active{
-  color: #008844;
-  background: rgba(0, 136, 68, 0.08);
-  border-color: #008844;
+  color: #fff;
+  background: linear-gradient(135deg, #0aa55e, #008844);
+  border-color: transparent;
   font-weight: 600;
+  box-shadow: 0 6rpx 14rpx rgba(0, 136, 68, 0.28);
 }
 .mode-manage{
   flex-shrink: 0;
@@ -140,7 +196,7 @@ page{
   background: #fff;
   border-radius: 28rpx;
   padding: 24rpx 24rpx 22rpx;
-  box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.07);
+  box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.06);
 }
 .fee-scroll{
   width: 100%;
@@ -166,6 +222,7 @@ page{
   background: rgba(0, 136, 68, 0.08);
   border-color: #008844;
   font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(0, 136, 68, 0.12);
 }
 .filter-row{
   display: flex;

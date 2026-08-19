@@ -3,14 +3,22 @@
   <view class="header">
     <view class="header-deco"></view>
     <view class="header-deco2"></view>
+    <view class="bubble b1"></view>
+    <view class="bubble b2"></view>
+    <view class="bubble b3"></view>
     <view class="header-left">
-      <view class="header-title">{{batchMode ? '已选 ' + selectedIds.length + ' 项' : '🎣 钓点列表'}}</view>
+      <view class="header-title-row">
+        <view class="header-icon">🎣</view>
+        <view class="header-title">{{batchMode ? '已选 ' + selectedIds.length + ' 项' : '钓点列表'}}</view>
+      </view>
       <view class="header-sub">{{batchMode ? '再次点击列表项可取消选择' : currentTitle + ' · 共 ' + filteredList.length + ' 个钓点'}}</view>
     </view>
     <view class="header-btns">
       <view wx:if="{{!batchMode}}" class="map-btn" bindtap="goMapPage" hover-class="map-btn-hover">🗺️ 附近钓点</view>
       <view class="map-btn" bindtap="toggleBatch" hover-class="map-btn-hover">{{batchMode ? '✕ 取消' : '☑️ 批量'}}</view>
     </view>
+    <view class="header-wave"></view>
+    <view class="header-wave2"></view>
   </view>
 
   <!-- 模式/团队切换器 -->
