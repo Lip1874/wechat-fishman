@@ -1,0 +1,38 @@
+<view class="page">
+  <!-- 头部 -->
+  <view class="header-card">
+    <view class="header-icon">👥</view>
+    <view class="header-info">
+      <view class="header-title">创建团队</view>
+      <view class="header-sub">多个钓友共同维护一份钓点库</view>
+    </view>
+  </view>
+
+  <!-- 创建表单 -->
+  <view class="form-card">
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">🏷️</text>
+        <text>团队名称</text>
+      </view>
+      <input
+        class="input"
+        bindinput="onInput"
+        value="{{teamName}}"
+        maxlength="20"
+        placeholder="给你的团队起个名字（20字以内）"
+        placeholder-class="placeholder"
+      />
+    </view>
+    <button class="btn-create" bindtap="create" hover-class="btn-hover">创建团队</button>
+  </view>
+
+  <!-- 创建成功：邀请好友 -->
+  <view wx:if="{{createdTeam}}" class="invite-card">
+    <view class="invite-title">🎉 「{{createdTeam.teamName}}」创建成功</view>
+    <view class="invite-sub">转发邀请卡片，好友点击即可加入团队</view>
+    <button class="btn-invite" open-type="share" hover-class="btn-hover">转发邀请好友</button>
+  </view>
+
+  <view class="tip">好友无需注册，点击你转发的邀请卡片即可自动加入团队</view>
+</view>

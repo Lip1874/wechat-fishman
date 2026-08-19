@@ -1,0 +1,27 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/addPoint/addPoint",
+    "pages/detail/detail",
+    "pages/mapPage/mapPage",
+    "pages/teamList/teamList",
+    "pages/createTeam/createTeam"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#008844",
+    "navigationBarTitleText": "钓点标点地图",
+    "navigationBarTextStyle": "white"
+  },
+
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于定位，查找附近钓点"
+    }
+  },
+  "requiredBackgroundModes": [
+    "location"
+  ],
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

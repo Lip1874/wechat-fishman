@@ -1,0 +1,9 @@
+{
+  "name": "dianpointService",
+  "version": "1.0.0",
+  "description": "钓点读写：私有/团队权限校验，所有读写仅走云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

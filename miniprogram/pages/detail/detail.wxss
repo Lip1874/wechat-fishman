@@ -1,0 +1,227 @@
+page {
+  background: #f6f7f9;
+}
+/* 图片轮播 */
+.gallery-wrap {
+  position: relative;
+  width: 100%;
+}
+.gallery {
+  width: 100%;
+  height: 420rpx;
+}
+.gallery-img {
+  width: 100%;
+  height: 420rpx;
+}
+.gallery-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef0f2;
+  color: #b0b4bb;
+  font-size: 28rpx;
+}
+/* 左右箭头 */
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 44rpx;
+  text-align: center;
+  line-height: 60rpx;
+  z-index: 10;
+}
+.arrow-left {
+  left: 20rpx;
+}
+.arrow-right {
+  right: 20rpx;
+}
+/* 图片序号 */
+.gallery-counter {
+  position: absolute;
+  right: 24rpx;
+  bottom: 64rpx;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  font-size: 24rpx;
+  padding: 6rpx 20rpx;
+  border-radius: 24rpx;
+}
+.content {
+  padding: 24rpx;
+  margin-bottom: 140rpx;
+  box-sizing: border-box;
+}
+/* 标题卡片 */
+.head {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+.head-left {
+  flex: 1;
+  min-width: 0;
+  margin-right: 20rpx;
+}
+.name {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #222;
+}
+.record {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #999;
+}
+.tag {
+  flex-shrink: 0;
+  font-size: 26rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 30rpx;
+  font-weight: 600;
+}
+/* 收费类型标签配色 */
+.tag-green {
+  background: rgba(0, 136, 68, 0.1);
+  color: #008844;
+}
+.tag-orange {
+  background: rgba(255, 140, 0, 0.14);
+  color: #e67e00;
+}
+.tag-blue {
+  background: rgba(24, 144, 255, 0.12);
+  color: #1890ff;
+}
+.tag-red {
+  background: rgba(230, 67, 64, 0.1);
+  color: #e64340;
+}
+/* 信息卡片 */
+.card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f2f3f5;
+}
+.row:last-child {
+  border-bottom: none;
+}
+.row-label {
+  font-size: 28rpx;
+  color: #666;
+}
+.row-value {
+  font-size: 28rpx;
+  color: #222;
+  font-weight: 600;
+}
+.dist-value {
+  color: #008844;
+}
+.card-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 20rpx;
+}
+/* 鱼种 */
+.fish-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+}
+.chip {
+  background: #f2f7f4;
+  color: #0a7a46;
+  font-size: 26rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 30rpx;
+  border: 2rpx solid rgba(0, 136, 68, 0.15);
+}
+.remark {
+  font-size: 28rpx;
+  color: #444;
+  line-height: 1.7;
+}
+/* 底部操作按钮 */
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));
+  background: #fff;
+  box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
+}
+.footer-row {
+  display: flex;
+  gap: 16rpx;
+}
+.edit-btn,
+.move-btn {
+  flex: 1;
+  height: 92rpx;
+  line-height: 88rpx;
+  background: #fff;
+  border-radius: 48rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  box-sizing: border-box;
+  padding: 0 16rpx;
+}
+.edit-btn {
+  color: #008844;
+  border: 2rpx solid #008844;
+}
+.move-btn {
+  color: #e67e00;
+  border: 2rpx solid #e67e00;
+}
+.edit-btn::after,
+.move-btn::after {
+  border: none;
+}
+.nav-btn {
+  flex: 1.2;
+  background: linear-gradient(135deg, #0aa55e, #008844);
+  color: #fff;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  height: 92rpx;
+  line-height: 92rpx;
+}
+.nav-btn::after {
+  border: none;
+}
+.btn-hover {
+  opacity: 0.85;
+}
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+  color: #b0b4bb;
+  font-size: 28rpx;
+}

@@ -1,0 +1,122 @@
+<view class="page">
+  <!-- 顶部绿色头部 -->
+  <view class="header">
+    <view class="header-deco"></view>
+    <view class="header-deco2"></view>
+    <view class="header-left">
+      <view class="header-title">{{batchMode ? '已选 ' + selectedIds.length + ' 项' : '🎣 钓点列表'}}</view>
+      <view class="header-sub">{{batchMode ? '再次点击列表项可取消选择' : currentTitle + ' · 共 ' + filteredList.length + ' 个钓点'}}</view>
+    </view>
+    <view class="header-btns">
+      <view wx:if="{{!batchMode}}" class="map-btn" bindtap="goMapPage" hover-class="map-btn-hover">🗺️ 附近钓点</view>
+      <view class="map-btn" bindtap="toggleBatch" hover-class="map-btn-hover">{{batchMode ? '✕ 取消' : '☑️ 批量'}}</view>
+    </view>
+  </view>
+
+  <!-- 模式/团队切换器 -->
+  <view class="mode-bar">
+    <scroll-view scroll-x class="mode-scroll" show-scrollbar="{{false}}" enhanced>
+      <view class="mode-group">
+        <view class="mode-item {{mode=='private'?'mode-active':''}}" bindtap="switchPrivate">🔒 我的私有</view>
+        <view
+          wx:for="{{myTeams}}"
+          wx:key="_id"
+          class="mode-item {{mode=='team' && teamId==item._id?'mode-active':''}}"
+          data-id="{{item._id}}"
+          bindtap="switchTeam"
+        >👥 {{item.teamName}}</view>
+      </view>
+    </scroll-view>
+    <view class="mode-manage" bindtap="goTeamList" hover-class="map-btn-hover">管理</view>
+  </view>
+
+  <!-- 筛选面板 -->
+  <view class="filter-panel">
+    <scroll-view scroll-x class="fee-scroll" show-scrollbar="{{false}}" enhanced>
+      <view class="fee-group">
+        <view
+          wx:for="{{feeFilterArr}}"
+          wx:key="*this"
+          class="fee-tab {{feeFilter==item?'fee-tab-active':''}}"
+          data-val="{{item}}"
+          bindtap="onFeeFilter"
+        >{{item}}</view>
+      </view>
+    </scroll-view>
+    <view class="filter-row">
+      <picker class="filter-picker" range="{{waterTypeFilterArr}}" value="{{waterTypeFilterIdx}}" bindchange="onWaterTypeFilter">
+        <view class="filter-select">
+          <text class="filter-text {{waterTypeFilter?'':'filter-placeholder'}}">{{waterTypeFilter || '水域类型'}}</text>
+          <text class="filter-arrow">▾</text>
+        </view>
+      </picker>
+      <picker class="filter-picker" range="{{fishFilterArr}}" value="{{fishFilterIdx}}" bindchange="onFishFilter">
+        <view class="filter-select">
+          <text class="filter-text {{fishFilter?'':'filter-placeholder'}}">{{fishFilter || '目标鱼种'}}</text>
+          <text class="filter-arrow">▾</text>
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 钓点列表 -->
+  <scroll-view scroll-y class="list-scroll" enhanced show-scrollbar="{{false}}">
+    <view class="list-inner">
+      <view wx:if="{{filteredList.length === 0}}" class="empty">
+        <view class="empty-icon">🎣</view>
+        <view class="empty-text">没有符合条件的钓点</view>
+        <view class="empty-sub">换个筛选条件，或分享你的第一个钓点</view>
+      </view>
+
+      <view wx:for="{{filteredList}}" wx:key="_id" class="swipe-wrap">
+        <!-- 左滑后露出的删除按钮（批量模式下隐藏） -->
+        <view wx:if="{{!batchMode}}" class="swipe-del" catchtap="onDeleteTap" data-index="{{index}}">删除</view>
+        <!-- 内容层：左滑跟手位移，展开态固定偏移 -->
+        <view
+          class="swipe-item {{batchMode?'batch-item':''}} {{selectedMap[item._id]?'batch-item-on':''}} {{index===swipeIdx?'swipe-open':''}} {{touchIdx===index?'swipe-no-anim':''}}"
+          style="transform: translateX({{index===swipeIdx ? -160 : (index===touchIdx ? swipeX : 0)}}rpx)"
+          bindtap="goDetail" data-id="{{item._id}}" data-index="{{index}}"
+          hover-class="item-hover" hover-stay-time="80"
+          bindtouchstart="onSwipeStart" bindtouchmove="onSwipeMove" bindtouchend="onSwipeEnd"
+        >
+          <!-- 批量模式勾选框 -->
+          <view wx:if="{{batchMode}}" class="check-box {{selectedMap[item._id]?'check-box-on':''}}" catchtap="onCheckTap" data-id="{{item._id}}">
+            <text wx:if="{{selectedMap[item._id]}}">✓</text>
+          </view>
+          <view class="cover-wrap">
+            <image wx:if="{{item.cover}}" src="{{item.cover}}" class="cover" mode="aspectFill"/>
+            <view wx:else class="cover cover-placeholder">🎣</view>
+          </view>
+          <view class="item-info">
+            <view class="item-head">
+              <view class="title">{{item.name}}</view>
+              <view class="dist" wx:if="{{item.distance}}">{{item.distance}}</view>
+            </view>
+            <view class="tags">
+              <view class="tag {{item.feeClass}}">{{item.feeType}}</view>
+              <view class="tag tag-gray" wx:if="{{item.waterType}}">{{item.waterType}}</view>
+            </view>
+            <view class="fish-row" wx:if="{{item.fishPreview.length}}">
+              <view class="fish-chip" wx:for="{{item.fishPreview}}" wx:key="*this">{{item}}</view>
+              <view class="fish-more" wx:if="{{item.fishMore}}">+{{item.fishMore}}</view>
+            </view>
+            <view class="record" wx:if="{{mode=='team' && item.creatorShort}}">录入人：{{item.creatorShort}}</view>
+          </view>
+          <view class="arrow">›</view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 批量操作栏 -->
+  <view class="batch-bar" wx:if="{{batchMode}}">
+    <view class="batch-all" bindtap="onSelectAll">{{selectedIds.length === filteredList.length && filteredList.length ? '取消全选' : '全选'}}</view>
+    <view class="batch-info">已选 {{selectedIds.length}} 项</view>
+    <view class="batch-del {{selectedIds.length ? '' : 'batch-del-dis'}}" bindtap="onBatchDelete">删除({{selectedIds.length}})</view>
+  </view>
+
+  <!-- 悬浮添加按钮（批量模式下隐藏） -->
+  <view wx:if="{{!batchMode}}" class="add-btn" bindtap="goAddPoint" hover-class="add-btn-hover">
+    <text class="plus">+</text>
+  </view>
+</view>

@@ -1,0 +1,49 @@
+<view class="page">
+  <!-- 头部 -->
+  <view class="header-card">
+    <view class="header-icon">👥</view>
+    <view class="header-info">
+      <view class="header-title">我的团队</view>
+      <view class="header-sub">创建或加入团队，共同维护钓点库</view>
+    </view>
+    <view class="header-btn" bindtap="goCreate" hover-class="btn-hover">+ 创建</view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{teams.length === 0}}" class="empty">
+    <view class="empty-icon">👥</view>
+    <view class="empty-text">还没有团队</view>
+    <view class="empty-sub">创建团队后转发邀请卡片，好友点击即可加入</view>
+    <view class="empty-btn" bindtap="goCreate" hover-class="btn-hover">创建我的第一个团队</view>
+  </view>
+
+  <!-- 团队列表 -->
+  <view wx:for="{{teams}}" wx:key="_id" class="team-card">
+    <view class="team-head" bindtap="toggleDetail" data-id="{{item._id}}" hover-class="btn-hover">
+      <view class="team-icon">🎣</view>
+      <view class="team-info">
+        <view class="team-name">{{item.teamName}}</view>
+        <view class="team-sub">{{item.memberCount}} 人 · {{item.isCreator ? '我创建的' : '我加入的'}}</view>
+      </view>
+      <view class="team-arrow">{{expandedId==item._id ? '▴' : '▾'}}</view>
+    </view>
+
+    <!-- 展开：成员列表与管理操作 -->
+    <view wx:if="{{expandedId==item._id && detail}}" class="team-body">
+      <view class="member-list">
+        <view class="member-row" wx:for="{{detail.memberList}}" wx:key="openid" wx:for-item="m">
+          <text class="member-avatar">{{m.isCreator ? '👑' : '👤'}}</text>
+          <text class="member-short">{{m.short}}</text>
+          <text class="member-tag" wx:if="{{m.isCreator}}">创建人</text>
+          <text class="member-tag self-tag" wx:if="{{m.isSelf}}">我</text>
+          <view wx:if="{{detail.isCreator && !m.isCreator}}" class="member-del" catchtap="removeMember" data-openid="{{m.openid}}">移除</view>
+        </view>
+      </view>
+      <view class="team-actions">
+        <button class="btn-invite" open-type="share" data-id="{{item._id}}" bindtap="setShareTeam" hover-class="btn-hover">邀请好友</button>
+        <view wx:if="{{detail.isCreator}}" class="btn-danger" bindtap="dismissTeam" hover-class="btn-hover">解散团队</view>
+        <view wx:else class="btn-danger" bindtap="leaveTeam" hover-class="btn-hover">退出团队</view>
+      </view>
+    </view>
+  </view>
+</view>

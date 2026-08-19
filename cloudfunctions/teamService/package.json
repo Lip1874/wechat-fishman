@@ -1,0 +1,9 @@
+{
+  "name": "teamService",
+  "version": "1.0.0",
+  "description": "团队管理：创建/加入/成员管理/解散，所有团队写操作仅走云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,22 @@
+<view class="page">
+  <map
+    id="nearMap"
+    class="map"
+    latitude="{{centerLat}}"
+    longitude="{{centerLng}}"
+    scale="12"
+    markers="{{markers}}"
+    include-points="{{includePoints}}"
+    show-location
+    bindmarkertap="markertap"
+  ></map>
+
+  <!-- 底部信息条 -->
+  <view class="footer">
+    <view class="footer-info">
+      <view class="footer-title">{{title}}</view>
+      <view class="footer-sub">共 {{markers.length}} 个标点，点击标记查看详情</view>
+    </view>
+    <button class="footer-btn" bindtap="back" hover-class="footer-btn-hover">返回列表</button>
+  </view>
+</view>

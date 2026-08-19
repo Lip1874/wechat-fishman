@@ -1,0 +1,69 @@
+<view wx:if="{{info}}">
+  <!-- 实拍图片轮播 -->
+  <view wx:if="{{info.images && info.images.length}}" class="gallery-wrap">
+    <swiper class="gallery" current="{{current}}" bindchange="onSwiperChange" indicator-dots indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#fff" circular>
+      <swiper-item wx:for="{{info.images}}" wx:key="*this">
+        <image src="{{item}}" class="gallery-img" mode="aspectFill" bindtap="previewImg" data-src="{{item}}"/>
+      </swiper-item>
+    </swiper>
+    <view class="gallery-counter" wx:if="{{info.images.length > 1}}">{{current + 1}}/{{info.images.length}}</view>
+    <view class="arrow arrow-left" wx:if="{{info.images.length > 1}}" catchtap="prevImg">‹</view>
+    <view class="arrow arrow-right" wx:if="{{info.images.length > 1}}" catchtap="nextImg">›</view>
+  </view>
+  <view wx:else class="gallery gallery-empty">暂无实拍图片</view>
+
+  <view class="content">
+    <!-- 标题 -->
+    <view class="head">
+      <view class="head-left">
+        <view class="name">{{info.name}}</view>
+        <view class="record" wx:if="{{info.creatorShort}}">录入人：{{info.creatorShort}}</view>
+      </view>
+      <view class="tag {{info.tagClass}}">{{info.feeType}}</view>
+    </view>
+
+    <!-- 基础信息 -->
+    <view class="card">
+      <view class="row" wx:if="{{distance}}">
+        <text class="row-label">📍 距离我的位置</text>
+        <text class="row-value dist-value">{{distance}}</text>
+      </view>
+      <view class="row">
+        <text class="row-label">🌊 水域类型</text>
+        <text class="row-value">{{info.waterType || '未填写'}}</text>
+      </view>
+      <view class="row">
+        <text class="row-label">📏 水深</text>
+        <text class="row-value">{{info.depth ? info.depth + 'm' : '未填写'}}</text>
+      </view>
+      <view class="row">
+        <text class="row-label">🅿️ 停车情况</text>
+        <text class="row-value">{{info.park || '未填写'}}</text>
+      </view>
+    </view>
+
+    <!-- 目标鱼种 -->
+    <view class="card" wx:if="{{info.fish && info.fish.length}}">
+      <view class="card-title">🎣 目标鱼种</view>
+      <view class="fish-chips">
+        <view class="chip" wx:for="{{info.fish}}" wx:key="*this">{{item}}</view>
+      </view>
+    </view>
+
+    <!-- 钓点备注 -->
+    <view class="card" wx:if="{{info.remark}}">
+      <view class="card-title">📝 钓点备注</view>
+      <view class="remark">{{info.remark}}</view>
+    </view>
+  </view>
+
+  <!-- 底部操作按钮 -->
+  <view class="footer">
+    <view class="footer-row">
+      <button wx:if="{{info.canEdit}}" bindtap="editPoint" class="edit-btn" hover-class="btn-hover">✏️ 编辑</button>
+      <button wx:if="{{info.canEdit && !info.teamId}}" bindtap="moveToTeam" class="move-btn" hover-class="btn-hover">📦 移到团队</button>
+      <button bindtap="openNav" class="nav-btn" hover-class="btn-hover">📍 立即导航前往</button>
+    </view>
+  </view>
+</view>
+<view wx:else class="loading">加载中...</view>

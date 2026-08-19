@@ -1,0 +1,9 @@
+{
+  "name": "clearDb",
+  "version": "1.0.0",
+  "description": "一次性清空 dianpoints 集合数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

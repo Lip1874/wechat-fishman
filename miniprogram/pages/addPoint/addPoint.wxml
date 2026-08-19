@@ -1,0 +1,180 @@
+<view class="page">
+  <!-- 头部 -->
+  <view class="header-card">
+    <view class="header-icon">🎣</view>
+    <view class="header-info">
+      <view class="header-title">{{isEdit ? '编辑钓点' : (mode=='team' ? '新增团队钓点' : '添加新钓点')}}</view>
+      <view class="header-sub">
+        <text wx:if="{{mode=='team'}}">👥 团队：{{teamName || '加载中...'}}</text>
+        <text wx:else>🔒 我的私有钓点</text>
+        <text wx:if="{{creatorShort}}"> · 录入人：{{creatorShort}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 基本信息 -->
+  <view class="form-card">
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">📍</text>
+        <text>钓点名称</text>
+        <text class="required">*</text>
+      </view>
+      <input class="input" bindinput="onInput" data-key="name" value="{{form.name}}" placeholder="输入钓点名称" placeholder-class="placeholder"/>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">💰</text>
+        <text>收费类型</text>
+        <text class="required">*</text>
+      </view>
+      <view class="tag-group">
+        <view wx:for="{{feeTypeArr}}" wx:key="*this" class="tag {{feeTypeIdx==index?'tag-active':''}}" data-index="{{index}}" bindtap="onTagTap">{{item}}</view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">🌊</text>
+        <text>水域类型</text>
+      </view>
+      <picker class="picker-full" range="{{waterTypeArr}}" value="{{waterTypeIdx}}" bindchange="onWaterTypePicker">
+        <view class="select {{waterTypeIdx>-1?'select-active':''}}">
+          <text class="select-value {{waterTypeIdx>-1?'':'placeholder'}}">{{form.waterType || '请选择水域类型'}}</text>
+          <text class="select-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">🐟</text>
+        <text>目标鱼种</text>
+      </view>
+      <view class="select" bindtap="openFishPanel">
+        <view class="fish-chips" wx:if="{{fishSelected.length}}">
+          <view class="fish-chip" wx:for="{{fishSelected}}" wx:key="*this">
+            {{item}}
+            <text class="fish-chip-del" catchtap="removeFish" data-index="{{index}}">×</text>
+          </view>
+        </view>
+        <text class="select-value placeholder" wx:else>请选择目标鱼种（可多选）</text>
+        <text class="select-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">📏</text>
+        <text>水深（米）</text>
+      </view>
+      <input class="input" type="digit" bindinput="onInput" data-key="depth" value="{{form.depth}}" placeholder="如：2.5" placeholder-class="placeholder"/>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">🅿️</text>
+        <text>停车情况</text>
+      </view>
+      <input class="input" bindinput="onInput" data-key="park" value="{{form.park}}" placeholder="方便/不便/无车位" placeholder-class="placeholder"/>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">📝</text>
+        <text>鱼情备注</text>
+      </view>
+      <textarea class="textarea" bindinput="onInput" data-key="remark" value="{{form.remark}}" placeholder="描述鱼情、钓位、装备建议等" placeholder-class="placeholder"></textarea>
+    </view>
+  </view>
+
+  <!-- 位置与图片 -->
+  <view class="form-card">
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">🗺️</text>
+        <text>地图选点</text>
+        <text class="required">*</text>
+      </view>
+      <view wx:if="{{form.longitude}}" class="map-preview-wrap" bindtap="selectMapPoint">
+        <map class="map-preview" latitude="{{form.latitude}}" longitude="{{form.longitude}}" scale="15" markers="{{mapMarkers}}"/>
+        <view class="map-preview-footer">
+          <view class="map-preview-btn">重新选点</view>
+        </view>
+      </view>
+      <view wx:else class="map-picker" bindtap="selectMapPoint">
+        <view class="map-picker-title">点击在地图上选取位置</view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">📷</text>
+        <text>实拍图片</text>
+        <text class="count" wx:if="{{tempImages.length}}">{{tempImages.length}}/6</text>
+      </view>
+      <view class="img-grid">
+        <view class="img-item" wx:for="{{tempImages}}" wx:key="*this">
+          <image src="{{item}}" class="preview-img" mode="aspectFill" bindtap="previewImage" data-url="{{item}}"/>
+          <view class="img-del" catchtap="removeImage" data-index="{{index}}">×</view>
+        </view>
+        <view wx:if="{{tempImages.length<6}}" class="add-img" bindtap="chooseImage">
+          <text class="add-plus">+</text>
+          <text class="add-text">添加图片</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="tip">带 * 为必填项，信息越详细越方便钓友找到钓点</view>
+
+  <!-- 鱼种多选面板 -->
+  <view class="mask" wx:if="{{showFishPanel}}" bindtap="closeFishPanel"></view>
+  <view class="panel {{showFishPanel?'panel-show':''}}">
+    <view class="panel-header">
+      <text class="panel-title">选择目标鱼种</text>
+      <text class="panel-close" bindtap="closeFishPanel">×</text>
+    </view>
+    <scroll-view scroll-y class="panel-body">
+      <view class="fish-option {{item.checked?'fish-option-active':''}}" wx:for="{{fishOptions}}" wx:key="value" data-value="{{item.value}}" bindtap="onFishToggle">
+        <text>{{item.value}}</text>
+        <view class="check">{{item.checked?'✓':''}}</view>
+      </view>
+    </scroll-view>
+    <view class="panel-footer">
+      <button class="panel-btn" hover-class="btn-hover" bindtap="confirmFish">确定（已选 {{fishSelected.length}} 种）</button>
+    </view>
+  </view>
+
+  <!-- 提交 -->
+  <view class="submit-bar">
+    <button class="btn-submit" hover-class="btn-hover" bindtap="submit">{{isEdit?'保存修改':'提交钓点'}}</button>
+  </view>
+
+  <!-- 自定义地图选点弹层：搜索 + 点击地图/十字选点 -->
+  <view class="map-mask" wx:if="{{showMapPicker}}">
+    <view class="map-picker-panel">
+      <view class="map-picker-header">
+        <text class="map-picker-title">搜索并在地图上选点</text>
+        <text class="map-picker-close" bindtap="closeMapPicker">×</text>
+      </view>
+      <!-- 搜索 -->
+      <view class="map-search">
+        <input class="map-search-input" placeholder="搜索地点，如：朝阳公园" value="{{searchKeyword}}" confirm-type="search" bindinput="onSearchInput" bindconfirm="searchPlaces" placeholder-class="placeholder"/>
+        <view class="map-search-btn" bindtap="searchPlaces">搜索</view>
+      </view>
+      <!-- 搜索结果 -->
+      <scroll-view wx:if="{{searchResults.length}}" scroll-y class="map-search-list">
+        <view class="map-search-item" wx:for="{{searchResults}}" wx:key="id" data-index="{{index}}" bindtap="onResultTap">
+          <view class="map-search-title">{{item.title}}</view>
+          <view class="map-search-addr">{{item.address}}</view>
+        </view>
+      </scroll-view>
+      <map class="map-full" latitude="{{pickerLat}}" longitude="{{pickerLng}}" scale="15" markers="{{mapMarkers}}" show-location bindtap="onMapTap"/>
+      <view class="map-picker-footer">
+        <button class="map-picker-confirm" hover-class="btn-hover" bindtap="confirmMapPick">确定选点</button>
+      </view>
+    </view>
+  </view>
+</view>
