@@ -52,7 +52,7 @@
 
     <!-- 钓点备注 -->
     <view class="card" wx:if="{{info.remark}}">
-      <view class="card-title">📝 钓点备注111</view>
+      <view class="card-title">📝 钓点备注</view>
       <view class="remark">{{info.remark}}</view>
     </view>
   </view>
