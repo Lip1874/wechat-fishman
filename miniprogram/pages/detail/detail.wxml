@@ -60,7 +60,7 @@
   <!-- 底部操作按钮 -->
   <view class="footer">
     <view class="footer-row">
-      <button wx:if="{{info.canEdit}}" bindtap="editPoint" class="edit-btn" hover-class="btn-hover">✏️ 编辑</button>
+      <button wx:if="{{info.canEdit}}" bindtap="editPoint" class="edit-btn" hover-class="btn-hover">✏️ 编辑333</button>
       <button wx:if="{{info.canEdit && !info.teamId}}" bindtap="moveToTeam" class="move-btn" hover-class="btn-hover">📦 移到团队</button>
       <button bindtap="openNav" class="nav-btn" hover-class="btn-hover">📍 立即导航前往</button>
     </view>
