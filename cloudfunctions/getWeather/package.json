@@ -1,0 +1,9 @@
+{
+  "name": "getWeather",
+  "version": "1.0.0",
+  "description": "和风天气实况 + 钓鱼/紫外线生活指数；QWEATHER_KEY/QWEATHER_HOST 存环境变量，严禁暴露前端。使用内置 https，无第三方依赖",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

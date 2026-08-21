@@ -10,7 +10,12 @@ const FEE_CLASS_MAP = {
 const DEFAULT_WATER = ['江河','水库','河道','塘','湖泊','溪流']
 const DEFAULT_FISH = ['鲫鱼','鲤鱼','草鱼','青鱼','鲢鳙','黑鱼','翘嘴','马口','罗非','鲶鱼','黄颡鱼','白条','鳜鱼','其他']
 
-const { call } = require('../../utils/api')
+const { call, getOpenId } = require('../../utils/api')
+const { weatherEmoji, warnLevelText } = require('../../utils/weather')
+
+// 天气缓存：相同经纬度 15 分钟内不重复请求和风接口（手动点刷新强制重新请求）
+const WEATHER_CACHE_KEY = 'weatherCache'
+const WEATHER_CACHE_TTL = 15 * 60 * 1000
 
 Page({
   data: {
@@ -27,17 +32,41 @@ Page({
     // 筛选条件
     feeFilterArr: ['全部','免费野钓','黑坑','休闲收费塘','禁钓'],
     feeFilter: '全部',
-    waterTypeFilterArr: ['全部'],
+    waterTypeFilterArr: [{label:'全部', value:''}],
     waterTypeFilterIdx: 0,
-    waterTypeFilter: '',
-    fishFilterArr: ['全部'],
+    waterTypeFilter: null,
+    fishFilterArr: [{label:'全部', value:''}],
     fishFilterIdx: 0,
-    fishFilter: '',
+    fishFilter: null,
     // 模式与团队
     mode: 'private',      // private=我的私有 / team=团队
     teamId: '',           // 当前团队ID
     myTeams: [],          // 我的团队列表
-    currentTitle: '我的私有钓点'
+    currentTitle: '我的私有钓点',
+    // 首页当前位置实况天气
+    weather: null,               // 天气数据（icon/text/temp/...）
+    weatherStatus: 'loading',    // loading=加载中 ok=正常 denied=定位被拒 error=接口异常
+    weatherError: ''             // 接口异常时的具体原因（便于排查）
+  },
+
+  // 天气缓存：同经纬度 15 分钟内直接读缓存，不重复请求
+  readWeatherCache(lat, lng) {
+    try {
+      const cache = wx.getStorageSync(WEATHER_CACHE_KEY)
+      if (!cache || !cache.weather) return null
+      if (cache.lat !== lat || cache.lng !== lng) return null
+      if (Date.now() - cache.time > WEATHER_CACHE_TTL) return null
+      return cache.weather
+    } catch (e) {
+      return null
+    }
+  },
+
+  // 写天气缓存
+  writeWeatherCache(lat, lng, weather) {
+    try {
+      wx.setStorageSync(WEATHER_CACHE_KEY, { lat, lng, time: Date.now(), weather })
+    } catch (e) { /* 忽略存储失败 */ }
   },
 
   onLoad(options) {
@@ -133,33 +162,43 @@ Page({
     this.loadPoints()
   },
 
-  // 跳转团队管理页
+  // 跳转团队管理页（tabBar 页面需用 switchTab）
   goTeamList() {
-    wx.navigateTo({ url: '/pages/teamList/teamList' })
+    wx.switchTab({ url: '/pages/teamList/teamList' })
   },
 
-  // 加载筛选选项（水域/鱼种，来自 point_option 集合）
+  // 加载筛选选项（水域/鱼种，来自 point_option 集合，只读「自己名下的」字典项；dictType 区分，兼容旧 category 字段）
   async initOptions() {
     const db = wx.cloud.database()
     let water = [], fish = []
     try {
-      const res = await db.collection('point_option').orderBy('sort','asc').limit(100).get()
+      const openid = await getOpenId()
+      const res = await db.collection('point_option')
+        .where({ _openid: openid })
+        .orderBy('sort','asc')
+        .limit(100)
+        .get()
       res.data.forEach(i => {
-        if (i.category === 'waterType') water.push(i.value)
-        else if (i.category === 'fish') fish.push(i.value)
+        const type = i.dictType || (i.category === 'waterType' ? 'river_type' : i.category === 'fish' ? 'fish_type' : '')
+        const label = i.label || i.value || ''
+        const value = i.value || label
+        if (!label) return
+        if (type === 'river_type') water.push({ label, value })
+        else if (type === 'fish_type') fish.push({ label, value })
       })
     } catch (err) {
       console.error('读取筛选选项失败', err)
     }
-    if (!water.length) water = DEFAULT_WATER
-    if (!fish.length) fish = DEFAULT_FISH
+    // 名下无个人数据时使用默认兜底（在「我的-基础数据」首次打开会自动生成个人标准选项）
+    if (!water.length) water = DEFAULT_WATER.map(v => ({ label: v, value: v }))
+    if (!fish.length) fish = DEFAULT_FISH.map(v => ({ label: v, value: v }))
     this.setData({
-      waterTypeFilterArr: ['全部', ...water],
-      fishFilterArr: ['全部', ...fish]
+      waterTypeFilterArr: [{ label: '全部', value: '' }, ...water],
+      fishFilterArr: [{ label: '全部', value: '' }, ...fish]
     })
   },
 
-  // 获取当前定位
+  // 获取当前定位（成功后同时刷新距离与首页天气）
   getUserLocation() {
     wx.getLocation({
       type: 'gcj02',
@@ -169,10 +208,93 @@ Page({
           userLng: res.longitude
         })
         this.refreshDistances()
+        this.fetchWeather(res.latitude, res.longitude)
       },
       fail: () => {
         wx.showToast({ title: '定位失败', icon: 'none' })
+        // 定位权限被拒绝/失败：天气卡片降级提示，地图、列表、新增钓点等业务完全不受影响
+        this.setData({ weatherStatus: 'denied' })
       }
+    })
+  },
+
+  // 获取当前位置实况天气（失败仅降级卡片，绝不影响其他业务）
+  // force=true 时跳过缓存强制重新请求（点刷新按钮）
+  fetchWeather(lat, lng, force) {
+    if (!lat || !lng) return
+    const rLat = Number(lat.toFixed(4))
+    const rLng = Number(lng.toFixed(4))
+    if (!force) {
+      const cached = this.readWeatherCache(rLat, rLng)
+      if (cached) {
+        this.setData({ weather: cached, weatherStatus: 'ok', weatherError: '' })
+        return
+      }
+    }
+    this.setData({ weatherStatus: 'loading', weatherError: '' })
+    call('getWeather', { lat, lon: lng, type: 'now' })
+      .then(res => {
+        if (!res.weather) throw new Error('无天气数据')
+        const w = res.weather
+        // 预警等级文案（供预警条展示）
+        const warning = (w.warning || []).map(item => ({
+          ...item,
+          levelText: warnLevelText(item.color)
+        }))
+        // 24小时逐时：天气图标 emoji + 降雨概率颜色分级（0-30浅灰 / 30-60浅蓝 / 60-100深蓝）
+        const hourly = (w.hourly || []).map(h => ({
+          ...h,
+          emoji: weatherEmoji(h.icon),
+          probClass: h.prob == null ? '' : (h.prob <= 30 ? 'prob-low' : (h.prob <= 60 ? 'prob-mid' : 'prob-high'))
+        }))
+        const weather = Object.assign({}, w, {
+          emoji: weatherEmoji(w.icon),
+          hourly,
+          warning,
+          hasWarn: warning.length > 0
+        })
+        this.setData({ weather, weatherStatus: 'ok', weatherError: '' })
+        this.writeWeatherCache(rLat, rLng, weather)
+      })
+      .catch(err => {
+        console.error('获取天气失败', err)
+        this.setData({
+          weatherStatus: 'error',
+          weatherError: (err && err.message) || '天气服务暂时不可用'
+        })
+      })
+  },
+
+  // 手动刷新天气：重新定位后强制重新请求（跳过 15 分钟缓存）
+  onRefreshWeather() {
+    this.setData({ weatherStatus: 'loading', weatherError: '' })
+    wx.getLocation({
+      type: 'gcj02',
+      success: (res) => this.fetchWeather(res.latitude, res.longitude, true),
+      fail: () => {
+        wx.showModal({
+          title: '需要定位权限',
+          content: '获取当前位置天气需要定位权限，是否前往设置开启？',
+          confirmText: '去设置',
+          success: (r) => {
+            if (r.confirm) wx.openSetting()
+            else this.setData({ weatherStatus: 'denied' })
+          }
+        })
+      }
+    })
+  },
+
+  // 点击预警条：展示预警详情
+  onWarnTap(e) {
+    const idx = e.currentTarget.dataset.index
+    const warn = this.data.weather && this.data.weather.warning && this.data.weather.warning[idx]
+    if (!warn) return
+    wx.showModal({
+      title: `${warn.levelText || ''}预警`,
+      content: warn.description || warn.headline || '暂无详情',
+      showCancel: false,
+      confirmText: '知道了'
     })
   },
 
@@ -254,11 +376,11 @@ Page({
     if (feeFilter && feeFilter !== '全部') {
       list = list.filter(i => i.feeType === feeFilter)
     }
-    if (waterTypeFilter) {
-      list = list.filter(i => i.waterType === waterTypeFilter)
+    if (waterTypeFilter && waterTypeFilter.value) {
+      list = list.filter(i => i.waterType === waterTypeFilter.value)
     }
-    if (fishFilter) {
-      list = list.filter(i => (i.fish || []).indexOf(fishFilter) > -1)
+    if (fishFilter && fishFilter.value) {
+      list = list.filter(i => (i.fish || []).indexOf(fishFilter.value) > -1)
     }
     // 筛选变化时，清掉已不在列表中的选中项（避免计数虚高）
     const ids = selectedIds.filter(id => list.some(i => i._id === id))
@@ -275,20 +397,20 @@ Page({
   // 水域类型筛选
   onWaterTypeFilter(e) {
     const idx = e.detail.value
-    const val = this.data.waterTypeFilterArr[idx]
+    const item = this.data.waterTypeFilterArr[idx]
     this.setData({
       waterTypeFilterIdx: idx,
-      waterTypeFilter: val === '全部' ? '' : val
+      waterTypeFilter: item.value ? item : null
     })
     this.applyFilter()
   },
   // 鱼种筛选
   onFishFilter(e) {
     const idx = e.detail.value
-    const val = this.data.fishFilterArr[idx]
+    const item = this.data.fishFilterArr[idx]
     this.setData({
       fishFilterIdx: idx,
-      fishFilter: val === '全部' ? '' : val
+      fishFilter: item.value ? item : null
     })
     this.applyFilter()
   },

@@ -1,0 +1,54 @@
+<view class="page">
+  <!-- 头部 -->
+  <view class="header">
+    <view class="header-title">{{title}}</view>
+    <view class="header-sub">
+      <text wx:if="{{isAdmin}}">共 {{list.length}} 个选项 · 长按拖动排序 · 默认项不可修改/删除</text>
+      <text wx:else>共 {{list.length}} 个选项 · 只读模式 · 仅管理员可维护</text>
+    </view>
+  </view>
+
+  <!-- 字典选项列表（movable-list 长按拖拽排序，仅管理员可拖） -->
+  <view wx:if="{{list.length}}" class="list">
+    <movable-list class="movable-list"
+      drag="{{isAdmin}}"
+      direction="vertical"
+      bindchange="onDragChange"
+      binddragstart="onDragStart"
+      binddragend="onDragEnd">
+      <movable-item wx:for="{{list}}" wx:key="_id"
+        index="{{index}}" key="{{item._id}}"
+        class="movable-item">
+        <view class="item">
+          <view class="item-main">
+            <view class="item-label-line">
+              <text class="item-label">{{item.label}}</text>
+              <text wx:if="{{item.isDefault}}" class="item-tag">默认</text>
+            </view>
+            <view class="item-meta">存储值：{{item.value}}</view>
+            <view class="item-meta">排序：{{item.sort}}</view>
+          </view>
+          <view class="item-ops" wx:if="{{isAdmin}}">
+            <block wx:if="{{!item.isDefault}}">
+              <view class="op op-edit" catchtap="goEdit" data-id="{{item._id}}" hover-class="op-hover">编辑</view>
+              <view class="op op-del" catchtap="onDelete" data-index="{{index}}" hover-class="op-hover">删除</view>
+            </block>
+          </view>
+          <view class="drag-handle" wx:if="{{isAdmin}}">≡</view>
+        </view>
+      </movable-item>
+    </movable-list>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{!loading && !list.length}}" class="empty">
+    <view class="empty-icon">📋</view>
+    <view class="empty-text">该分类暂无选项</view>
+    <view class="empty-sub">{{isAdmin ? '点击下方按钮新增第一个选项' : '仅管理员可新增选项'}}</view>
+  </view>
+
+  <!-- 新增按钮（仅管理员） -->
+  <view class="add-bar" wx:if="{{isAdmin}}">
+    <button class="add-btn" bindtap="goAdd" hover-class="add-btn-hover">＋ 新增选项</button>
+  </view>
+</view>

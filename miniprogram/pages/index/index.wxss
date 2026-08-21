@@ -534,3 +534,335 @@ page{
   font-weight: 300;
   line-height: 1;
 }
+
+/* 当前位置实况天气卡片 */
+.weather-card{
+  flex-shrink: 0;
+  position: relative;
+  z-index: 4;
+  margin: 20rpx 24rpx 0;
+  background: linear-gradient(135deg, #f0fbf5 0%, #ffffff 60%);
+  border: 2rpx solid rgba(0, 136, 68, 0.12);
+  border-radius: 28rpx;
+  padding: 22rpx 26rpx;
+  box-shadow: 0 12rpx 32rpx rgba(0, 80, 40, 0.08);
+  box-sizing: border-box;
+}
+
+/* ---- 骨架 loading ---- */
+.weather-skeleton{
+  padding: 6rpx 0;
+}
+.skel-block{
+  background: linear-gradient(90deg, #eef0f2 25%, #f7f8fa 50%, #eef0f2 75%);
+  background-size: 400% 100%;
+  animation: skel-shine 1.2s ease infinite;
+  border-radius: 12rpx;
+}
+@keyframes skel-shine{
+  0%{ background-position: 100% 0; }
+  100%{ background-position: 0 0; }
+}
+.skel-warn{
+  width: 60%;
+  height: 28rpx;
+  margin-bottom: 20rpx;
+}
+.skel-row{
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.skel-icon{
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 24rpx;
+  margin-right: 20rpx;
+}
+.skel-col{
+  flex: 1;
+}
+.skel-temp{
+  width: 45%;
+  height: 52rpx;
+  margin-bottom: 12rpx;
+}
+.skel-text{
+  width: 70%;
+  height: 28rpx;
+}
+.skel-meta{
+  flex: 1;
+  height: 40rpx;
+  margin-right: 14rpx;
+}
+.skel-meta:last-child{
+  margin-right: 0;
+}
+.skel-hour-row{
+  gap: 14rpx;
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  border-top: 2rpx dashed #e8ecef;
+}
+.skel-hour{
+  flex: 1;
+  height: 120rpx;
+  border-radius: 16rpx;
+}
+
+/* ---- 预警提示条 ---- */
+.weather-warn{
+  display: flex;
+  align-items: center;
+  background: #fff4e6;
+  border: 2rpx solid #ffb647;
+  border-radius: 16rpx;
+  padding: 12rpx 16rpx;
+  margin-bottom: 16rpx;
+}
+.warn-icon{
+  flex-shrink: 0;
+  font-size: 30rpx;
+  margin-right: 10rpx;
+}
+.warn-text{
+  flex: 1;
+  min-width: 0;
+  font-size: 22rpx;
+  color: #b26a00;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.warn-more{
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: #d48806;
+  margin-left: 10rpx;
+}
+
+/* ---- 位置 + 刷新 ---- */
+.weather-head{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14rpx;
+}
+.weather-place{
+  flex: 1;
+  min-width: 0;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 16rpx;
+}
+.weather-refresh,
+.weather-fail-btn{
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: #008844;
+  background: rgba(0, 136, 68, 0.08);
+  border: 2rpx solid rgba(0, 136, 68, 0.25);
+  padding: 8rpx 20rpx;
+  border-radius: 30rpx;
+}
+.weather-btn-hover{
+  opacity: 0.75;
+}
+
+/* ---- 主区域 ---- */
+.weather-main{
+  display: flex;
+  align-items: center;
+}
+.weather-icon{
+  flex-shrink: 0;
+  font-size: 84rpx;
+  margin-right: 24rpx;
+}
+.weather-info{
+  flex: 1;
+  min-width: 0;
+}
+.weather-temp{
+  font-size: 72rpx;
+  font-weight: 800;
+  color: #222;
+  line-height: 1;
+}
+.weather-deg{
+  font-size: 44rpx;
+  font-weight: 700;
+}
+.weather-text{
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 10rpx;
+}
+.weather-feel{
+  font-size: 22rpx;
+  color: #8a8f99;
+  margin-top: 6rpx;
+}
+
+/* ---- 一行气象指标 ---- */
+.weather-meta{
+  display: flex;
+  margin-top: 20rpx;
+  padding-top: 18rpx;
+  border-top: 2rpx dashed #e8ecef;
+}
+.weather-meta-item{
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  text-align: center;
+  padding: 0 4rpx;
+}
+.meta-icon{
+  font-size: 30rpx;
+  line-height: 1;
+}
+.meta-val{
+  font-size: 20rpx;
+  color: #555;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- 未来24小时逐时预报 ---- */
+.weather-hourly{
+  margin-top: 20rpx;
+  padding-top: 18rpx;
+  border-top: 2rpx dashed #e8ecef;
+}
+.hourly-title{
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #0a7a46;
+  margin-bottom: 12rpx;
+}
+.hourly-scroll{
+  width: 100%;
+  white-space: nowrap;
+}
+.hourly-row{
+  display: inline-flex;
+  gap: 10rpx;
+  padding-right: 8rpx;
+}
+.hourly-col{
+  flex-shrink: 0;
+  width: 110rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  background: #f7faf8;
+  border: 2rpx solid rgba(0, 136, 68, 0.08);
+  border-radius: 18rpx;
+  padding: 14rpx 0 12rpx;
+  box-sizing: border-box;
+}
+.h-time{
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #555;
+  line-height: 1;
+}
+.h-icon{
+  font-size: 36rpx;
+  line-height: 1;
+}
+.h-temp{
+  font-size: 30rpx;
+  font-weight: 800;
+  color: #222;
+  line-height: 1;
+}
+.h-prob{
+  font-size: 20rpx;
+  line-height: 1;
+  padding: 4rpx 12rpx;
+  border-radius: 16rpx;
+}
+/* 降雨概率颜色分级 */
+.h-prob.prob-low{
+  color: #9aa0a8;
+  background: #eef0f2;
+}
+.h-prob.prob-mid{
+  color: #1f6feb;
+  background: #e8f0fe;
+}
+.h-prob.prob-high{
+  color: #fff;
+  background: #1a5fd0;
+}
+.h-prob:not(.prob-low):not(.prob-mid):not(.prob-high){
+  color: #9aa0a8;
+  background: #eef0f2;
+}
+
+/* ---- 钓鱼指数 + 紫外线 ---- */
+.weather-idx-row{
+  display: flex;
+  gap: 16rpx;
+  margin-top: 18rpx;
+}
+.weather-idx-card{
+  flex: 1;
+  min-width: 0;
+  background: #eef7f1;
+  border: 2rpx solid rgba(0, 136, 68, 0.12);
+  border-radius: 20rpx;
+  padding: 16rpx;
+  box-sizing: border-box;
+}
+.idx-title{
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #0a7a46;
+  margin-bottom: 8rpx;
+}
+.idx-level{
+  font-size: 30rpx;
+  font-weight: 800;
+  color: #0a7a46;
+  line-height: 1.2;
+}
+.idx-num{
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #8a8f99;
+  margin-left: 4rpx;
+}
+.idx-text{
+  font-size: 20rpx;
+  color: #5a7a68;
+  margin-top: 8rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+/* ---- 失败/拒绝状态 ---- */
+.weather-fail{
+  font-size: 26rpx;
+  color: #8a8f99;
+  padding: 10rpx 0;
+}
+.weather-fail-btn{
+  display: inline-block;
+  margin-top: 14rpx;
+}

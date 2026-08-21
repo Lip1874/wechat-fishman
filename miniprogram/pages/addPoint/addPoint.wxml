@@ -39,7 +39,7 @@
         <text class="label-icon">🌊</text>
         <text>水域类型</text>
       </view>
-      <picker class="picker-full" range="{{waterTypeArr}}" value="{{waterTypeIdx}}" bindchange="onWaterTypePicker">
+      <picker class="picker-full" range="{{waterTypeArr}}" range-key="label" value="{{waterTypeIdx}}" bindchange="onWaterTypePicker">
         <view class="select {{waterTypeIdx>-1?'select-active':''}}">
           <text class="select-value {{waterTypeIdx>-1?'':'placeholder'}}">{{form.waterType || '请选择水域类型'}}</text>
           <text class="select-arrow">›</text>
@@ -138,7 +138,7 @@
     </view>
     <scroll-view scroll-y class="panel-body">
       <view class="fish-option {{item.checked?'fish-option-active':''}}" wx:for="{{fishOptions}}" wx:key="value" data-value="{{item.value}}" bindtap="onFishToggle">
-        <text>{{item.value}}</text>
+        <text>{{item.label}}</text>
         <view class="check">{{item.checked?'✓':''}}</view>
       </view>
     </scroll-view>

@@ -1,4 +1,5 @@
 const { call } = require('../../utils/api')
+const { weatherEmoji } = require('../../utils/weather')
 
 // 收费类型 -> 标签颜色（与首页风格一致）
 const FEE_CLASS_MAP = {
@@ -12,7 +13,10 @@ Page({
   data:{
     info:null,
     current:0,
-    distance:''      // 距离我的位置
+    distance:'',      // 距离我的位置
+    weather:null,               // 钓点点位实况天气
+    weatherStatus:'loading',    // loading=加载中 ok=正常 error=接口异常 nopos=无坐标
+    weatherError:''             // 接口异常时的具体原因（便于排查）
   },
   onLoad(options){
     this.pointId = options.id;
@@ -38,6 +42,8 @@ Page({
         current:0
       });
       this.calcDistanceToUser();
+      // 使用钓点自身经纬度获取实况天气（不获取手机定位）
+      this.loadPointWeather(p);
       // 私有钓点可编辑时，预加载我的团队（供「移到团队」使用）
       if (p.canEdit && !p.teamId) this.loadMyTeams();
     }catch(err){
@@ -45,6 +51,40 @@ Page({
       wx.showToast({title:err.message || "钓点不存在或已删除",icon:"none"});
       setTimeout(()=>wx.navigateBack(),800);
     }
+  },
+  // 使用钓点保存的经纬度获取实况天气（失败仅降级展示，不影响备注/鱼种等查看）
+  loadPointWeather(p){
+    if(p.latitude && p.longitude){
+      this.fetchWeather(p.latitude, p.longitude);
+    }else{
+      this.setData({weatherStatus:'nopos'});
+    }
+  },
+  // 调用 getWeather 云函数拉取实况天气
+  fetchWeather(lat,lng){
+    if(!lat || !lng) return;
+    call('getWeather',{lat,lon:lng,type:'now'})
+      .then(res=>{
+        if(!res.weather) throw new Error('无天气数据');
+        this.setData({
+          weather:Object.assign({},res.weather,{emoji:weatherEmoji(res.weather.icon)}),
+          weatherStatus:'ok'
+        });
+      })
+      .catch(err=>{
+        console.error('获取钓点天气失败', err);
+        this.setData({
+          weatherStatus:'error',
+          weatherError:(err && err.message) || '该钓点天气暂时不可用'
+        });
+      });
+  },
+  // 手动刷新钓点位天气（仍使用钓点自身坐标）
+  onRefreshWeather(){
+    const p = this.data.info;
+    if(!p) return;
+    this.setData({weatherStatus:'loading'});
+    this.loadPointWeather(p);
   },
   //加载我的团队列表（移到团队时选择用）
   loadMyTeams(){
@@ -65,7 +105,7 @@ Page({
         title:'暂无团队',
         content:'请先创建或加入一个团队，再移动钓点',
         confirmText:'去团队',
-        success:(r)=>{ if(r.confirm) wx.navigateTo({url:'/pages/teamList/teamList'}) }
+        success:(r)=>{ if(r.confirm) wx.switchTab({url:'/pages/teamList/teamList'}) }
       });
       return;
     }

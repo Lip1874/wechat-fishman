@@ -1,10 +1,13 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/teamList/teamList",
+    "pages/my/my",
     "pages/addPoint/addPoint",
     "pages/detail/detail",
     "pages/mapPage/mapPage",
-    "pages/teamList/teamList",
+    "pages/dict/dict",
+    "pages/dict/editDict",
     "pages/createTeam/createTeam"
   ],
   "window": {
@@ -13,12 +16,41 @@
     "navigationBarTitleText": "钓点标点地图",
     "navigationBarTextStyle": "white"
   },
-
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#008844",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/icons/home.png",
+        "selectedIconPath": "images/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/teamList/teamList",
+        "text": "团队",
+        "iconPath": "images/icons/business.png",
+        "selectedIconPath": "images/icons/business-active.png"
+      },
+      {
+        "pagePath": "pages/my/my",
+        "text": "我的",
+        "iconPath": "images/icons/usercenter.png",
+        "selectedIconPath": "images/icons/usercenter-active.png"
+      }
+    ]
+  },
   "permission": {
     "scope.userLocation": {
-      "desc": "用于定位，查找附近钓点"
+      "desc": "用于定位查找附近钓点、展示当前位置天气"
     }
   },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseLocation"
+  ],
   "requiredBackgroundModes": [
     "location"
   ],

@@ -4,7 +4,7 @@ const db = wx.cloud.database();
 const DEFAULT_WATER = ['江河','水库','河道','塘','湖泊','溪流'];
 const DEFAULT_FISH = ['鲫鱼','鲤鱼','草鱼','青鱼','鲢鳙','黑鱼','翘嘴','马口','罗非','鲶鱼','黄颡鱼','白条','鳜鱼','其他'];
 
-const { call } = require('../../utils/api');
+const { call, getOpenId } = require('../../utils/api');
 
 // 腾讯位置服务 WebService Key（免费申请：https://lbs.qq.com -> 控制台 -> 创建应用 -> 添加Key
 // 类型选「微信小程序」，绑定本小程序 AppID：wx94171f60adb395c8）
@@ -89,7 +89,7 @@ Page({
         setTimeout(()=>wx.navigateBack(),800);
         return;
       }
-      const waterTypeIdx = p.waterType ? this.data.waterTypeArr.indexOf(p.waterType) : -1;
+      const waterTypeIdx = p.waterType ? this.data.waterTypeArr.findIndex(i=>i.value===p.waterType) : -1;
       this.setData({
         mode: p.teamId ? 'team' : 'private',
         teamId: p.teamId || '',
@@ -133,11 +133,13 @@ Page({
     form.feeType = val;
     this.setData({form,feeTypeIdx:idx});
   },
-  //水域类型下拉
+  //水域类型下拉（picker 显示 label，存储 value）
   onWaterTypePicker(e){
     const idx = e.detail.value;
+    const item = this.data.waterTypeArr[idx];
+    if(!item) return;
     let form = this.data.form;
-    form.waterType = this.data.waterTypeArr[idx];
+    form.waterType = item.value;
     this.setData({form,waterTypeIdx:idx});
   },
   //目标鱼种选择面板
@@ -156,12 +158,13 @@ Page({
     this.setData({fishSelected});
     this.syncFishOptions();
   },
-  //根据已选鱼种重建面板选中态
+  //根据已选鱼种重建面板选中态（label 展示、value 存储）
   syncFishOptions(){
     const selected = this.data.fishSelected;
-    const fishOptions = this.data.fishArr.map(value => ({
-      value,
-      checked: selected.indexOf(value) > -1
+    const fishOptions = this.data.fishArr.map(item => ({
+      label: item.label,
+      value: item.value,
+      checked: selected.indexOf(item.value) > -1
     }));
     this.setData({fishOptions});
   },
@@ -179,50 +182,41 @@ Page({
     this.setData({fishSelected,form});
     this.syncFishOptions();
   },
-  //从数据库加载下拉选项（point_option 集合，category 区分 waterType/fish）
+  //从数据库加载「自己名下」的下拉选项（point_option 集合，dictType 区分 river_type/fish_type；兼容旧 category 字段）
+  //前端只读：point_option 权限为「所有用户可读」，写操作全部走 dictOperate 云函数（写入时归属本人，不与他人共享）
   async initOptions(){
     try{
-      const res = await db.collection('point_option').orderBy('sort','asc').limit(100).get();
-      if(res.data.length){
-        this.applyOptions(res.data);
-      }else{
-        await this.seedOptions();
-        const res2 = await db.collection('point_option').orderBy('sort','asc').limit(100).get();
-        this.applyOptions(res2.data);
-      }
+      const openid = await getOpenId();
+      const res = await db.collection('point_option').where({_openid:openid}).orderBy('sort','asc').limit(100).get();
+      this.applyOptions(res.data);
     }catch(err){
       console.error('读取下拉选项失败', err);
-      this.setData({
-        waterTypeArr:DEFAULT_WATER,
-        fishArr:DEFAULT_FISH,
-        fishOptions:DEFAULT_FISH.map(value=>({value,checked:false}))
-      });
+      this.applyOptions([]);
     }
   },
   applyOptions(list){
     const waterTypeArr = [], fishArr = [];
     list.forEach(i=>{
-      if(i.category==='waterType') waterTypeArr.push(i.value);
-      else if(i.category==='fish') fishArr.push(i.value);
+      // 兼容新旧数据：新结构 dictType；旧结构 category(waterType/fish)
+      const type = i.dictType || (i.category==='waterType' ? 'river_type' : i.category==='fish' ? 'fish_type' : '');
+      const label = i.label || i.value || '';
+      const value = i.value || label;
+      if(!label) return;
+      if(type==='river_type') waterTypeArr.push({label, value});
+      else if(type==='fish_type') fishArr.push({label, value});
     });
-    const water = waterTypeArr.length ? waterTypeArr : DEFAULT_WATER;
-    const fish = fishArr.length ? fishArr : DEFAULT_FISH;
+    // 名下无个人数据时使用默认兜底（在「我的-基础数据」首次打开会自动生成个人标准选项）
+    const water = waterTypeArr.length ? waterTypeArr : DEFAULT_WATER.map(v=>({label:v,value:v}));
+    const fish = fishArr.length ? fishArr : DEFAULT_FISH.map(v=>({label:v,value:v}));
     this.setData({
       waterTypeArr: water,
       fishArr: fish,
-      fishOptions: fish.map(value => ({
-        value,
-        checked: this.data.fishSelected.indexOf(value) > -1
+      fishOptions: fish.map(item=>({
+        label: item.label,
+        value: item.value,
+        checked: this.data.fishSelected.indexOf(item.value) > -1
       }))
     });
-  },
-  //首次使用时写入默认选项（之后可在云开发控制台增删改）
-  async seedOptions(){
-    const tasks = [
-      ...DEFAULT_WATER.map((v,i)=>({category:'waterType',value:v,sort:i})),
-      ...DEFAULT_FISH.map((v,i)=>({category:'fish',value:v,sort:i}))
-    ].map(item=>db.collection('point_option').add({data:item}));
-    await Promise.all(tasks);
   },
   //地图选点：打开自定义全屏地图，点击地图任意位置取经纬度
   selectMapPoint(){

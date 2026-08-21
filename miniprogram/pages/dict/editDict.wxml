@@ -1,0 +1,33 @@
+<view class="page">
+  <view class="form-card">
+    <view class="form-item">
+      <view class="label">
+        <text class="required">*</text>
+        <text>展示名称（label）</text>
+      </view>
+      <input class="input" value="{{form.label}}" bindinput="onInput" data-key="label" placeholder="下拉框显示的文字，如：江河" placeholder-class="placeholder"/>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="required">*</text>
+        <text>存储值（value）</text>
+      </view>
+      <input class="input" value="{{form.value}}" bindinput="onInput" data-key="value" placeholder="保存到钓点的值，同分类下不可重复" placeholder-class="placeholder"/>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="required">*</text>
+        <text>排序号（sort）</text>
+      </view>
+      <input class="input" type="number" value="{{form.sort}}" bindinput="onInput" data-key="sort" placeholder="数字越小越靠前，如：1" placeholder-class="placeholder"/>
+    </view>
+
+    <view class="tip">存储值用于钓点记录中保存，建议使用中文名称与历史数据保持一致，避免已保存的钓点显示异常。</view>
+  </view>
+
+  <view class="submit-bar">
+    <button class="btn-submit" bindtap="submit" hover-class="btn-hover">{{isEdit ? '保存修改' : '新增选项'}}</button>
+  </view>
+</view>

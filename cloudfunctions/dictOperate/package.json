@@ -1,0 +1,9 @@
+{
+  "name": "dictOperate",
+  "version": "1.0.0",
+  "description": "字典选项维护：管理员校验 + 增删改/排序，point_option 所有写操作仅走本云函数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

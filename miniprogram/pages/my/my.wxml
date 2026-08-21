@@ -1,0 +1,33 @@
+<view class="page">
+  <!-- 用户信息头部 -->
+  <view class="header">
+    <view class="header-deco"></view>
+    <view class="avatar">🎣</view>
+    <view class="user-info">
+      <view class="user-name">钓点地图用户</view>
+      <view class="user-id">ID: {{openidShort || '--'}}</view>
+    </view>
+  </view>
+
+  <!-- 折叠分组：初始全部收起；基础数据分组仅管理员可见（非管理员整组不渲染） -->
+  <view class="menu-group" wx:for="{{groups}}" wx:key="id" wx:if="{{!item.adminOnly || isAdmin}}">
+    <view class="group-header" bindtap="toggleGroup" data-id="{{item.id}}" hover-class="group-header-hover">
+      <text class="group-title">{{item.title}}</text>
+      <view class="group-arrow {{item.expanded ? 'group-arrow-open' : ''}}">▶</view>
+    </view>
+    <view class="group-body {{item.expanded ? 'group-body-open' : ''}}">
+      <view class="menu-card">
+        <view class="menu-item" wx:for="{{item.items}}" wx:for-item="sub" wx:key="text"
+          hover-class="item-hover"
+          bindtap="onItemTap"
+          data-action="{{sub.action}}"
+          data-type="{{sub.type}}">
+          <view class="menu-icon">{{sub.icon}}</view>
+          <view class="menu-text">{{sub.text}}</view>
+          <view class="menu-desc">{{sub.desc}}</view>
+          <view class="menu-arrow">›</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

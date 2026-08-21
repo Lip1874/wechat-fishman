@@ -225,3 +225,96 @@ page {
   color: #b0b4bb;
   font-size: 28rpx;
 }
+/* 该钓点实时天气 */
+.w-loading{
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  color: #8a8f99;
+  font-size: 26rpx;
+  padding: 8rpx 0;
+}
+.w-spinner{
+  width: 28rpx;
+  height: 28rpx;
+  border: 4rpx solid rgba(0, 136, 68, 0.2);
+  border-top-color: #0aa55e;
+  border-radius: 50%;
+  animation: w-rotate 0.8s linear infinite;
+}
+@keyframes w-rotate{
+  from{ transform: rotate(0deg); }
+  to{ transform: rotate(360deg); }
+}
+.w-main{
+  display: flex;
+  align-items: center;
+}
+.w-icon{
+  flex-shrink: 0;
+  font-size: 64rpx;
+  margin-right: 20rpx;
+}
+.w-info{
+  flex: 1;
+  min-width: 0;
+}
+.w-temp{
+  font-size: 48rpx;
+  font-weight: 800;
+  color: #222;
+  line-height: 1.1;
+}
+.w-text{
+  font-size: 24rpx;
+  color: #8a8f99;
+  margin-top: 4rpx;
+}
+.w-refresh{
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: #008844;
+  background: rgba(0, 136, 68, 0.08);
+  border: 2rpx solid rgba(0, 136, 68, 0.25);
+  padding: 10rpx 22rpx;
+  border-radius: 30rpx;
+}
+.w-btn-hover{
+  opacity: 0.75;
+}
+.w-meta{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 18rpx;
+}
+.w-meta-item{
+  font-size: 22rpx;
+  color: #666;
+  background: #f5f6f8;
+  padding: 6rpx 16rpx;
+  border-radius: 16rpx;
+}
+.w-indices{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 2rpx dashed #e8ecef;
+}
+.w-idx{
+  font-size: 24rpx;
+  color: #0a7a46;
+  background: #eef7f1;
+  padding: 8rpx 18rpx;
+  border-radius: 18rpx;
+}
+.w-fail{
+  font-size: 26rpx;
+  color: #8a8f99;
+  padding: 8rpx 0;
+}
+.w-refresh{
+  margin-top: 12rpx;
+}

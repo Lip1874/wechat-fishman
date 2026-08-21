@@ -52,19 +52,134 @@
       </view>
     </scroll-view>
     <view class="filter-row">
-      <picker class="filter-picker" range="{{waterTypeFilterArr}}" value="{{waterTypeFilterIdx}}" bindchange="onWaterTypeFilter">
+      <picker class="filter-picker" range="{{waterTypeFilterArr}}" range-key="label" value="{{waterTypeFilterIdx}}" bindchange="onWaterTypeFilter">
         <view class="filter-select">
-          <text class="filter-text {{waterTypeFilter?'':'filter-placeholder'}}">{{waterTypeFilter || '水域类型'}}</text>
+          <text class="filter-text {{waterTypeFilter?'':'filter-placeholder'}}">{{waterTypeFilter ? waterTypeFilter.label : '水域类型'}}</text>
           <text class="filter-arrow">▾</text>
         </view>
       </picker>
-      <picker class="filter-picker" range="{{fishFilterArr}}" value="{{fishFilterIdx}}" bindchange="onFishFilter">
+      <picker class="filter-picker" range="{{fishFilterArr}}" range-key="label" value="{{fishFilterIdx}}" bindchange="onFishFilter">
         <view class="filter-select">
-          <text class="filter-text {{fishFilter?'':'filter-placeholder'}}">{{fishFilter || '目标鱼种'}}</text>
+          <text class="filter-text {{fishFilter?'':'filter-placeholder'}}">{{fishFilter ? fishFilter.label : '目标鱼种'}}</text>
           <text class="filter-arrow">▾</text>
         </view>
       </picker>
     </view>
+  </view>
+
+  <!-- 当前位置实况天气卡片 -->
+  <view class="weather-card">
+    <!-- 加载中：骨架屏 -->
+    <block wx:if="{{weatherStatus === 'loading'}}">
+      <view class="weather-skeleton">
+        <view class="skel-bar skel-warn"></view>
+        <view class="skel-row">
+          <view class="skel-block skel-icon"></view>
+          <view class="skel-col">
+            <view class="skel-block skel-temp"></view>
+            <view class="skel-block skel-text"></view>
+          </view>
+        </view>
+        <view class="skel-row">
+          <view class="skel-block skel-meta"></view>
+          <view class="skel-block skel-meta"></view>
+          <view class="skel-block skel-meta"></view>
+          <view class="skel-block skel-meta"></view>
+        </view>
+        <view class="skel-row skel-hour-row">
+          <view class="skel-block skel-hour" wx:for="{{[1,2,3,4,5,6]}}" wx:key="*this"></view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 正常展示 -->
+    <block wx:elif="{{weatherStatus === 'ok' && weather}}">
+      <!-- 天气预警提示条（无预警隐藏） -->
+      <view class="weather-warn" wx:if="{{weather.hasWarn}}" bindtap="onWarnTap" data-index="0">
+        <text class="warn-icon">⚠️</text>
+        <text class="warn-text">⚠️ {{weather.warning[0].levelText || ''}}预警：{{weather.warning[0].headline}}</text>
+        <text class="warn-more">详情 ›</text>
+      </view>
+
+      <!-- 位置 + 刷新 -->
+      <view class="weather-head">
+        <view class="weather-place">📍 {{weather.place || '当前位置'}}</view>
+        <view class="weather-refresh" bindtap="onRefreshWeather" hover-class="weather-btn-hover">🔄 刷新</view>
+      </view>
+
+      <!-- 主区域：温度 / 天气描述 / 体感 -->
+      <view class="weather-main">
+        <view class="weather-icon">{{weather.emoji}}</view>
+        <view class="weather-info">
+          <view class="weather-temp">{{weather.temp}}<text class="weather-deg">°</text></view>
+          <view class="weather-text">{{weather.text}}</view>
+          <view class="weather-feel">体感 {{weather.feelsLike}}°</view>
+        </view>
+      </view>
+
+      <!-- 一行气象指标 -->
+      <view class="weather-meta">
+        <view class="weather-meta-item">
+          <text class="meta-icon">💨</text>
+          <text class="meta-val">{{weather.windDir || '--'}} {{weather.windScale || ''}}</text>
+        </view>
+        <view class="weather-meta-item">
+          <text class="meta-icon">💧</text>
+          <text class="meta-val">湿度 {{weather.humidity}}</text>
+        </view>
+        <view class="weather-meta-item">
+          <text class="meta-icon">🧭</text>
+          <text class="meta-val">气压 {{weather.pressure}}</text>
+        </view>
+        <view class="weather-meta-item">
+          <text class="meta-icon">👁</text>
+          <text class="meta-val">能见度 {{weather.vis}}</text>
+        </view>
+      </view>
+
+      <!-- 未来24小时逐时预报（横向滑动） -->
+      <view class="weather-hourly">
+        <view class="hourly-title">🕐 未来24小时</view>
+        <scroll-view scroll-x class="hourly-scroll" show-scrollbar="{{false}}" enhanced>
+          <view class="hourly-row">
+            <view class="hourly-col" wx:for="{{weather.hourly}}" wx:key="index">
+              <text class="h-time">{{item.time}}</text>
+              <text class="h-icon">{{item.emoji}}</text>
+              <text class="h-temp">{{item.temp}}°</text>
+              <text class="h-prob {{item.probClass}}">{{item.probText}}</text>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <!-- 钓鱼指数 + 紫外线 -->
+      <view class="weather-idx-row">
+        <view class="weather-idx-card">
+          <view class="idx-title">🎣 钓鱼指数</view>
+          <view class="idx-level" wx:if="{{weather.fishing}}">{{weather.fishing.category || '--'}}</view>
+          <view class="idx-text" wx:if="{{weather.fishing && weather.fishing.text}}">{{weather.fishing.text}}</view>
+          <view class="idx-text" wx:else>暂无钓鱼指数</view>
+        </view>
+        <view class="weather-idx-card">
+          <view class="idx-title">☀️ 紫外线</view>
+          <view class="idx-level" wx:if="{{weather.uv}}">{{weather.uv.category || '--'}}<text class="idx-num" wx:if="{{weather.uvIndex !== '--'}}">（{{weather.uvIndex}}）</text></view>
+          <view class="idx-text" wx:if="{{weather.uv && weather.uv.text}}">{{weather.uv.text}}</view>
+          <view class="idx-text" wx:else>暂无紫外线指数</view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 定位被拒 -->
+    <block wx:elif="{{weatherStatus === 'denied'}}">
+      <view class="weather-fail">📍 未获得定位权限，无法展示当前位置天气</view>
+      <view class="weather-fail-btn" bindtap="onRefreshWeather" hover-class="weather-btn-hover">重新获取</view>
+    </block>
+
+    <!-- 接口异常 -->
+    <block wx:else>
+      <view class="weather-fail">🌥 {{weatherError || '天气服务暂时不可用，请稍后刷新'}}</view>
+      <view class="weather-fail-btn" bindtap="onRefreshWeather" hover-class="weather-btn-hover">🔄 刷新</view>
+    </block>
   </view>
 
   <!-- 钓点列表 -->
