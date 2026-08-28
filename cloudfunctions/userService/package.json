@@ -1,0 +1,9 @@
+{
+  "name": "userService",
+  "version": "1.0.0",
+  "description": "用户信息、统计、同步配置、鱼情模型、诊断中心",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

@@ -1,33 +1,216 @@
 <view class="page">
-  <!-- 用户信息头部 -->
-  <view class="header">
-    <view class="header-deco"></view>
-    <view class="avatar">🎣</view>
+  <view class="header-bg"></view>
+
+  <!-- 1. 顶部个人信息区域 -->
+  <view class="header-card" bindtap="goProfile">
+    <view class="avatar-wrap">
+      <image class="avatar" wx:if="{{avatarDisplayUrl || profile.avatarUrl}}" src="{{avatarDisplayUrl || profile.avatarUrl}}" mode="aspectFill"></image>
+      <view class="avatar avatar-empty" wx:else>点击设置头像</view>
+    </view>
     <view class="user-info">
-      <view class="user-name">钓点地图用户</view>
-      <view class="user-id">ID: {{openidShort || '--'}}</view>
+      <view class="nick-name" wx:if="{{profile.nickName}}">{{profile.nickName}}</view>
+      <view class="nick-name nick-placeholder" wx:else>未登录</view>
+      <view class="remark" wx:if="{{profile.remark}}">{{profile.remark}}</view>
+      <view class="hint" wx:if="{{profile.nickName}}">点击设置微信头像和昵称</view>
+    </view>
+    <button class="login-btn" wx:if="{{!profile.nickName}}" catchtap="handleLogin">微信一键登录</button>
+    <view class="header-arrow" wx:else>›</view>
+  </view>
+
+  <!-- 2. 数据统计模块 -->
+  <view class="stats-card">
+    <view class="stat-item" hover-class="stat-hover" bindtap="onStatTap" data-type="points">
+      <view class="stat-num">{{stats.myPoints}}</view>
+      <view class="stat-label">我的钓点</view>
+      <view class="stat-sub">私密与公开</view>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item" hover-class="stat-hover" bindtap="onStatTap" data-type="fishRecords">
+      <view class="stat-num">{{stats.fishRecords}}</view>
+      <view class="stat-label">渔获记录</view>
+      <view class="stat-sub">我的鱼护列表</view>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item" hover-class="stat-hover" bindtap="onStatTap" data-type="activeRecords">
+      <view class="stat-num">{{stats.activeRecords}}</view>
+      <view class="stat-label">活跃记录</view>
+      <view class="stat-sub">出钓打卡/渔获上报</view>
     </view>
   </view>
 
-  <!-- 折叠分组：初始全部收起；基础数据分组仅管理员可见（非管理员整组不渲染） -->
-  <view class="menu-group" wx:for="{{groups}}" wx:key="id" wx:if="{{!item.adminOnly || isAdmin}}">
-    <view class="group-header" bindtap="toggleGroup" data-id="{{item.id}}" hover-class="group-header-hover">
-      <text class="group-title">{{item.title}}</text>
-      <view class="group-arrow {{item.expanded ? 'group-arrow-open' : ''}}">▶</view>
+  <!-- 3. 快捷操作入口 -->
+  <view class="quick-card">
+    <view class="quick-btn quick-btn-catch" hover-class="quick-hover" bindtap="quickAddCatch">
+      <text class="quick-icon">◇</text>
+      <view class="quick-main">
+        <view class="quick-title">快速新增渔获</view>
+        <view class="quick-sub">记录本次渔获</view>
+      </view>
+      <text class="quick-arrow">›</text>
     </view>
-    <view class="group-body {{item.expanded ? 'group-body-open' : ''}}">
-      <view class="menu-card">
-        <view class="menu-item" wx:for="{{item.items}}" wx:for-item="sub" wx:key="text"
-          hover-class="item-hover"
-          bindtap="onItemTap"
-          data-action="{{sub.action}}"
-          data-type="{{sub.type}}">
-          <view class="menu-icon">{{sub.icon}}</view>
-          <view class="menu-text">{{sub.text}}</view>
-          <view class="menu-desc">{{sub.desc}}</view>
-          <view class="menu-arrow">›</view>
+    <view class="quick-btn quick-btn-point" hover-class="quick-hover" bindtap="quickAddPoint">
+      <text class="quick-icon">◎</text>
+      <view class="quick-main">
+        <view class="quick-title">快速新建钓点</view>
+        <view class="quick-sub">打卡/标记新钓点</view>
+      </view>
+      <text class="quick-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 4. 我的鱼情模型模块 -->
+  <view class="model-card">
+    <view class="model-head">
+      <view class="model-left">
+        <view class="model-icon">⚡</view>
+        <view class="model-title-wrap">
+          <text class="model-title">我的鱼情模型</text>
+          <text class="model-beta">Beta</text>
         </view>
       </view>
+      <view class="model-progress-wrap">
+        <view class="progress-bar">
+          <view class="progress-inner" style="width: {{modelProgress}}%;"></view>
+        </view>
+        <view class="progress-text">{{modelProgress}}%</view>
+      </view>
     </view>
+    <view class="model-desc">基于你的钓点、渔获数据，智能预测鱼口时机</view>
+    <view class="model-foot">
+      <view class="model-tip">上报渔获、打卡钓点即可提升模型进度</view>
+      <view class="model-btn" hover-class="model-btn-hover" bindtap="goModelGrowth">查看成长 ›</view>
+    </view>
+  </view>
+
+  <!-- 4. 功能菜单列表 -->
+  <view class="menu-card">
+    <view class="menu-item" bindtap="onMenuTap" data-key="privatePoints" hover-class="menu-hover">
+      <view class="menu-icon icon-private">◎</view>
+      <view class="menu-main">
+        <view class="menu-title">我的私密钓点</view>
+        <view class="menu-sub">精确坐标仅自己可见</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+    <view class="menu-item" bindtap="onMenuTap" data-key="fishRecords" hover-class="menu-hover">
+      <view class="menu-icon icon-fish">◇</view>
+      <view class="menu-main">
+        <view class="menu-title">我的鱼护</view>
+        <view class="menu-sub">查看全部结构化记录</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+    <view class="menu-item" bindtap="onMenuTap" data-key="drafts" hover-class="menu-hover">
+      <view class="menu-icon icon-draft">▦</view>
+      <view class="menu-main">
+        <view class="menu-title">离线草稿<view class="menu-badge" wx:if="{{hasDraft}}"></view></view>
+        <view class="menu-sub" wx:if="{{hasDraft}}">有 {{draftCount}} 条未保存的草稿</view>
+        <view class="menu-sub" wx:else>断网时自动保存在本机</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+    <view class="menu-item" bindtap="onMenuTap" data-key="sync" hover-class="menu-hover">
+      <view class="menu-icon icon-sync">☁</view>
+      <view class="menu-main">
+        <view class="menu-title">数据与同步</view>
+        <view class="menu-sub">云端主存接口 / 本地备用</view>
+      </view>
+      <view class="menu-sync-btn" hover-class="sync-btn-hover" catchtap="manualSync">手动同步</view>
+      <view class="menu-extra">{{syncMode === 'cloud' ? '云端优先' : '本地优先'}}</view>
+      <view class="menu-arrow">›</view>
+    </view>
+    <view class="menu-item last" bindtap="onMenuTap" data-key="privacy" hover-class="menu-hover">
+      <view class="menu-icon icon-privacy">▣</view>
+      <view class="menu-main">
+        <view class="menu-title">隐私与权限</view>
+        <view class="menu-sub">位置、记录和公开范围</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+  </view>
+
+  <!-- 5. 设置模块 -->
+  <view class="menu-card">
+    <view class="menu-item">
+      <view class="menu-icon icon-notify">♫</view>
+      <view class="menu-main">
+        <view class="menu-title">消息通知设置</view>
+        <view class="menu-sub">渔获提醒、天气与鱼口推送</view>
+      </view>
+      <switch class="menu-switch" checked="{{settings.notify}}" color="#1677ff" bindchange="onNotifyChange" />
+    </view>
+    <view class="menu-item">
+      <view class="menu-icon icon-unit">↔</view>
+      <view class="menu-main">
+        <view class="menu-title">距离单位</view>
+        <view class="menu-sub">列表与详情中的距离显示</view>
+      </view>
+      <view class="unit-seg">
+        <view class="unit-opt {{settings.distanceUnit === 'km' ? 'active' : ''}}" data-unit="km" bindtap="onUnitTap">km</view>
+        <view class="unit-opt {{settings.distanceUnit === 'm' ? 'active' : ''}}" data-unit="m" bindtap="onUnitTap">米</view>
+      </view>
+    </view>
+    <view class="menu-item last" bindtap="openFishPref" hover-class="menu-hover">
+      <view class="menu-icon icon-fishpref">🐟</view>
+      <view class="menu-main">
+        <view class="menu-title">鱼种偏好设置</view>
+        <view class="menu-sub">{{fishPrefText}}</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+  </view>
+
+  <!-- 6. 状态提示条 -->
+  <view class="status-bar">
+    <view class="status-dot"></view>
+    <view class="status-body">
+      <view class="status-title">云端连接正常</view>
+      <view class="status-sub" wx:if="{{!isAdmin}}">云函数已响应，但当前账号还没有管理员权限。</view>
+      <view class="status-sub" wx:else>云函数已响应，当前账号拥有管理员权限。</view>
+    </view>
+  </view>
+
+  <!-- 7. 诊断中心模块 -->
+  <view class="diag-card">
+    <view class="diag-header">
+      <view class="diag-title-wrap">
+        <view class="diag-icon">⚡</view>
+        <text class="diag-title">诊断中心</text>
+      </view>
+      <view class="diag-status">
+        <view class="status-dot"></view>
+        <text>服务正常</text>
+      </view>
+    </view>
+    <view class="diag-desc">复制信息去分析，再把分析文字或诊断指令粘贴回来</view>
+    <view class="diag-actions">
+      <button class="diag-btn diag-btn-plain" bindtap="copyDiagnosis">复制诊断信息</button>
+      <button class="diag-btn diag-btn-primary" bindtap="pasteAnalysis">粘贴分析指令</button>
+    </view>
+  </view>
+
+  <!-- 8. 鱼种偏好选择弹层 -->
+  <view class="fish-pref-mask" wx:if="{{showFishPref}}" bindtap="closeFishPref">
+    <view class="fish-pref-panel" catchtap="noop">
+      <view class="fish-pref-header">
+        <text class="fish-pref-title">鱼种偏好设置</text>
+        <text class="fish-pref-close" bindtap="closeFishPref">×</text>
+      </view>
+      <view class="fish-pref-desc">选择你常钓的鱼种，用于个性化推荐</view>
+      <view class="fish-pref-grid">
+        <view wx:for="{{fishPrefOptions}}" wx:key="name"
+          class="fish-pref-item {{item.checked ? 'checked' : ''}}"
+          bindtap="onFishPrefToggle" data-name="{{item.name}}">{{item.name}}</view>
+      </view>
+      <view class="fish-pref-actions">
+        <view class="fish-pref-btn fish-pref-cancel" bindtap="closeFishPref">取消</view>
+        <view class="fish-pref-btn fish-pref-ok" bindtap="confirmFishPref">确认</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载/空态/网络异常提示 -->
+  <view class="toast-wrap" wx:if="{{loading}}">
+    <view class="toast">加载中...</view>
   </view>
 </view>

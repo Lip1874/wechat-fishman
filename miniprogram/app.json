@@ -2,31 +2,35 @@
   "pages": [
     "pages/index/index",
     "pages/teamList/teamList",
+    "pages/teamDetail/teamDetail",
     "pages/my/my",
     "pages/addPoint/addPoint",
     "pages/detail/detail",
     "pages/mapPage/mapPage",
     "pages/dict/dict",
     "pages/dict/editDict",
-    "pages/createTeam/createTeam"
+    "pages/createTeam/createTeam",
+    "pages/profile/profile",
+    "pages/fishLog/fishLog",
+    "pages/addCatch/addCatch"
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#008844",
+    "navigationBarBackgroundColor": "#1677ff",
     "navigationBarTitleText": "钓点标点地图",
     "navigationBarTextStyle": "white"
   },
   "tabBar": {
     "color": "#999999",
-    "selectedColor": "#008844",
+    "selectedColor": "#1677ff",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [
       {
         "pagePath": "pages/index/index",
         "text": "首页",
-        "iconPath": "images/icons/home.png",
-        "selectedIconPath": "images/icons/home-active.png"
+        "iconPath": "images/icons/fish.png",
+        "selectedIconPath": "images/icons/fish-active.png"
       },
       {
         "pagePath": "pages/teamList/teamList",

@@ -1,4 +1,4 @@
-const { call } = require('../../utils/api')
+const { call, ensureLogin } = require('../../utils/api')
 
 Page({
   data: {
@@ -10,8 +10,10 @@ Page({
     this.setData({ teamName: e.detail.value })
   },
 
-  // 创建团队
-  create() {
+  // 创建团队（需先登录，未登录提示并引导完善资料）
+  async create() {
+    const loggedIn = await ensureLogin()
+    if (!loggedIn) return
     const teamName = this.data.teamName.trim()
     if (!teamName) return wx.showToast({ title: '请填写团队名称', icon: 'none' })
     if (teamName.length > 20) return wx.showToast({ title: '团队名称不能超过20个字', icon: 'none' })

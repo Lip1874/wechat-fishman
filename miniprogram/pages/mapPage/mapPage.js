@@ -12,6 +12,8 @@ Page({
   onLoad(options) {
     this.mode = options.mode || 'private'
     this.teamId = options.teamId || ''
+    // 永不空军分组：聚合我加入的全部团队的钓点
+    this.teamIds = (options.teamIds || '').split(',').filter(Boolean)
     if (options.title) this.setData({ title: decodeURIComponent(options.title) })
     this.getLocation()
     this.loadPoints()
@@ -32,26 +34,36 @@ Page({
   },
 
   // 按当前模式/团队加载钓点标点（云函数校验权限）
+  // 地图需要展示全部标点：all=true 一次取前100条；status='全部' 保证作废标点也展示
   loadPoints() {
-    call('dianpointService', { action: 'list', mode: this.mode, teamId: this.teamId })
+    const payload = { action: 'list', mode: this.mode, all: true, status: '全部' }
+    if (this.mode === 'teamAll') payload.teamIds = this.teamIds
+    else payload.teamId = this.teamId
+    call('dianpointService', payload)
       .then(res => {
-        const markers = (res.list || []).map(item => ({
-          id: item._id,
-          latitude: item.latitude,
-          longitude: item.longitude,
-          width: 34,
-          height: 34,
-          label: {
-            content: item.name,
-            color: '#ffffff',
-            fontSize: 12,
-            borderRadius: 8,
-            bgColor: '#008844',
-            padding: 6,
-            anchorX: -20,
-            anchorY: -32
+        // 兼容历史数据：status 缺省视为正常
+        const markers = (res.list || []).map(item => {
+          const invalid = item.status === '作废'
+          return {
+            id: item._id,
+            latitude: item.latitude,
+            longitude: item.longitude,
+            width: 34,
+            height: 34,
+            // 作废钓点置灰：透明度降级 + 灰色标签
+            alpha: invalid ? 0.45 : 1,
+            label: {
+              content: item.name,
+              color: invalid ? '#666666' : '#ffffff',
+              fontSize: 12,
+              borderRadius: 8,
+              bgColor: invalid ? '#b0b4bb' : '#1677ff',
+              padding: 6,
+              anchorX: -20,
+              anchorY: -32
+            }
           }
-        }))
+        })
         const includePoints = markers.map(m => ({
           latitude: m.latitude,
           longitude: m.longitude

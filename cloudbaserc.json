@@ -1,6 +1,6 @@
 {
-  "envId": "{{env.ENV_ID}}",
-  "functionRoot": "./functions",
+  "envId": "lip-d1gnihlmk7f339105",
+  "functionRoot": "./cloudfunctions",
   "functions": [],
   "ai": {
     "defaultAgent": "{{env.AI_DEFAULT_AGENT}}",

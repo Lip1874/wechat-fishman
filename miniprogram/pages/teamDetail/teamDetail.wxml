@@ -1,0 +1,157 @@
+<view class="page">
+  <!-- 头部：团队名称 + 成员/钓点概览 -->
+  <view class="header-card" wx:if="{{team}}">
+    <view class="header-icon">🎣</view>
+    <view class="header-info">
+      <view class="team-name">{{team.teamName}}</view>
+      <view class="team-meta">{{team.memberCount}} 位成员 · {{team.pointCount}} 个共享钓点</view>
+    </view>
+    <view class="header-btn" bindtap="goHomeTeam" hover-class="btn-hover">永不空军 ›</view>
+  </view>
+
+  <!-- 团队公告 -->
+  <view class="section" wx:if="{{team}}">
+    <view class="section-head">
+      <text class="section-title">📢 团队公告</text>
+      <view wx:if="{{team.isCreator}}" class="section-edit" bindtap="onEditAnnouncement" hover-class="btn-hover">编辑</view>
+    </view>
+    <view class="announcement" wx:if="{{team.announcement}}">{{team.announcement}}</view>
+    <view class="empty-inner" wx:else>暂无公告，创建人可以发布团队公告</view>
+  </view>
+
+  <!-- 公告编辑弹层 -->
+  <view class="mask" wx:if="{{announcementEditing}}" bindtap="onCloseAnnouncement"></view>
+  <view class="sheet" wx:if="{{announcementEditing}}">
+    <view class="sheet-head">
+      <text class="sheet-title">编辑团队公告</text>
+      <view class="sheet-close" bindtap="onCloseAnnouncement">✕</view>
+    </view>
+    <textarea
+      class="announcement-input"
+      value="{{announcementDraft}}"
+      bindinput="onAnnouncementInput"
+      maxlength="200"
+      placeholder="输入团队公告（最多200字）"
+      auto-height
+    ></textarea>
+    <view class="sheet-btn" bindtap="onSaveAnnouncement" hover-class="btn-hover">保存公告</view>
+  </view>
+
+  <!-- 成员管理 -->
+  <view class="section" wx:if="{{team}}">
+    <view class="section-head">
+      <text class="section-title">👥 成员管理</text>
+      <text class="section-count">{{team.memberCount}} 人</text>
+    </view>
+    <view class="member-list" wx:if="{{memberList.length}}">
+      <view class="member-row" wx:for="{{memberList}}" wx:key="openid">
+        <image class="member-avatar" wx:if="{{m.avatarDisplayUrl || m.avatarUrl}}" src="{{m.avatarDisplayUrl || m.avatarUrl}}" mode="aspectFill"/>
+        <view class="member-avatar member-avatar-empty" wx:else>{{m.isCreator ? '👑' : '👤'}}</view>
+        <view class="member-name">{{m.name}}</view>
+        <text class="member-tag" wx:if="{{m.isCreator}}">创建人</text>
+        <text class="member-tag self-tag" wx:if="{{m.isSelf}}">我</text>
+        <view wx:if="{{team.isCreator && !m.isCreator}}" class="member-del" catchtap="removeMember" data-openid="{{m.openid}}">移除</view>
+      </view>
+    </view>
+    <view class="empty-inner" wx:if="{{!memberList.length}}">暂无成员</view>
+    <view class="empty-inner-sub" wx:if="{{!memberList.length}}">点击「邀请好友」分享加入，共同维护团队钓点</view>
+    <view class="team-actions">
+      <button class="btn-invite" open-type="share" bindtap="setShareTeam" hover-class="btn-hover">📤 邀请好友</button>
+      <view wx:if="{{team.isCreator}}" class="btn-danger" bindtap="dismissTeam" hover-class="btn-hover">解散团队</view>
+      <view wx:else class="btn-danger" bindtap="leaveTeam" hover-class="btn-hover">退出团队</view>
+    </view>
+  </view>
+
+  <!-- 共享钓点清单 -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">🗺️ 共享钓点清单</text>
+      <view class="section-add" bindtap="goAddPoint" hover-class="btn-hover">+ 添加钓点</view>
+    </view>
+    <view class="sync-tip">
+      <text class="sync-tip-icon">✅</text>
+      <text class="sync-tip-text">已自动同步：团队钓点会实时同步到首页「永不空军」分组，与私有钓点区分展示</text>
+    </view>
+    <view wx:if="{{pointsLoading}}" class="loading-text">加载中...</view>
+    <block wx:elif="{{points.length === 0}}">
+      <view class="empty-inner">暂无共享钓点</view>
+      <view class="empty-inner-sub">点击「+ 添加钓点」，或到首页将私有钓点移动到团队</view>
+    </block>
+    <view wx:else class="point-list">
+      <view
+        wx:for="{{points}}"
+        wx:key="_id"
+        class="point-item"
+        bindtap="goPointDetail"
+        data-id="{{item._id}}"
+        hover-class="btn-hover"
+      >
+        <view class="point-cover">
+          <image wx:if="{{item.cover}}" src="{{item.cover}}" class="point-img" mode="aspectFill"/>
+          <view wx:else class="point-img point-placeholder">🎣</view>
+        </view>
+        <view class="point-info">
+          <view class="point-name">
+            {{item.name}}
+            <text class="point-invalid" wx:if="{{item.invalid}}">已作废</text>
+          </view>
+          <view class="point-tags">
+            <text class="point-tag {{item.feeClass}}">{{item.feeType}}</text>
+            <text class="point-tag tag-gray" wx:if="{{item.waterType}}">{{item.waterType}}</text>
+          </view>
+          <view class="point-fish" wx:if="{{item.fishPreview.length}}">
+            <text class="point-fish-chip" wx:for="{{item.fishPreview}}" wx:for-item="f" wx:key="*this">{{f}}</text>
+            <text class="point-fish-more" wx:if="{{item.fishMore}}">+{{item.fishMore}}</text>
+          </view>
+          <view class="point-creator" wx:if="{{item.creatorShort}}">录入人：{{item.creatorShort}}</view>
+        </view>
+        <view class="point-arrow">›</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 团队渔获汇总 -->
+  <view class="section">
+    <view class="section-head">
+      <text class="section-title">🐟 团队渔获汇总</text>
+    </view>
+    <view wx:if="{{catchLoading}}" class="loading-text">加载中...</view>
+    <block wx:elif="{{catchSummary && catchSummary.totalCount > 0}}">
+      <view class="catch-stats">
+        <view class="catch-stat">
+          <view class="catch-num">{{catchSummary.totalCount}}</view>
+          <view class="catch-label">累计渔获（条）</view>
+        </view>
+        <view class="catch-stat">
+          <view class="catch-num">{{catchSummary.recordCount}}</view>
+          <view class="catch-label">记录次数</view>
+        </view>
+        <view class="catch-stat">
+          <view class="catch-num">{{catchSummary.releaseCount}}</view>
+          <view class="catch-label">放流（条）</view>
+        </view>
+      </view>
+      <view class="catch-species" wx:if="{{catchSummary.topSpecies.length}}">
+        <view class="catch-sub-title">热门鱼种</view>
+        <view class="species-wrap">
+          <text class="species-chip" wx:for="{{catchSummary.topSpecies}}" wx:key="name">{{item.name}} ×{{item.count}}</text>
+        </view>
+      </view>
+      <view class="catch-recent" wx:if="{{catchSummary.recentList.length}}">
+        <view class="catch-sub-title">最近渔获</view>
+        <view class="recent-row" wx:for="{{catchSummary.recentList}}" wx:key="_id">
+          <text class="recent-fish">{{item.fishName}} ×{{item.count}}</text>
+          <text class="recent-meta" wx:if="{{item.pointName}}">{{item.pointName}}</text>
+          <text class="recent-meta" wx:if="{{item.recorderName}}">{{item.recorderName}}</text>
+          <text class="recent-meta" wx:if="{{item.caughtAtLabel}}">{{item.caughtAtLabel}}</text>
+        </view>
+      </view>
+    </block>
+    <block wx:else>
+      <view class="empty-inner">团队钓点还没有渔获记录</view>
+      <view class="empty-inner-sub">成员在团队钓点记录渔获后自动汇总到这里</view>
+    </block>
+  </view>
+
+  <view class="foot-space"></view>
+</view>

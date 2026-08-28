@@ -1,6 +1,6 @@
 <view wx:if="{{info}}">
-  <!-- 实拍图片轮播 -->
-  <view wx:if="{{info.images && info.images.length}}" class="gallery-wrap">
+  <!-- 实拍图片轮播（只读态展示） -->
+  <view wx:if="{{!isEdit && info.images && info.images.length}}" class="gallery-wrap">
     <swiper class="gallery" current="{{current}}" bindchange="onSwiperChange" indicator-dots indicator-color="rgba(255,255,255,0.6)" indicator-active-color="#fff" circular>
       <swiper-item wx:for="{{info.images}}" wx:key="*this">
         <image src="{{item}}" class="gallery-img" mode="aspectFill" bindtap="previewImg" data-src="{{item}}"/>
@@ -10,15 +10,23 @@
     <view class="arrow arrow-left" wx:if="{{info.images.length > 1}}" catchtap="prevImg">‹</view>
     <view class="arrow arrow-right" wx:if="{{info.images.length > 1}}" catchtap="nextImg">›</view>
   </view>
-  <view wx:else class="gallery gallery-empty">暂无实拍图片</view>
+  <view wx:elif="{{!isEdit}}" class="gallery gallery-empty">暂无实拍图片</view>
 
-  <view class="content">
+  <!-- 已作废提示条 -->
+  <view wx:if="{{info.invalid}}" class="invalid-banner">🚫 该钓点已作废，仅供查看</view>
+
+  <!-- 编辑状态提示条 -->
+  <view wx:if="{{isEdit}}" class="edit-banner">✏️ 正在编辑钓点，修改后点击底部「保存修改」生效</view>
+
+  <!-- ==================== 只读模式 ==================== -->
+  <view wx:if="{{!isEdit}}" class="content">
     <!-- 标题 -->
     <view class="head">
       <view class="head-left">
         <view class="name">{{info.name}}</view>
         <view class="record" wx:if="{{info.creatorShort}}">录入人：{{info.creatorShort}}</view>
       </view>
+      <view class="tag tag-invalid" wx:if="{{info.invalid}}">已作废</view>
       <view class="tag {{info.tagClass}}">{{info.feeType}}</view>
     </view>
 
@@ -37,18 +45,35 @@
         <text class="row-value">{{info.depth ? info.depth + 'm' : '未填写'}}</text>
       </view>
       <view class="row">
+        <text class="row-label">🕐 作钓时间</text>
+        <text class="row-value">{{info.fishTime || '未填写'}}</text>
+      </view>
+      <view class="row">
+        <text class="row-label">🪱 饵料</text>
+        <text class="row-value">{{info.bait || '未填写'}}</text>
+      </view>
+      <view class="row">
+        <text class="row-label">🌊 水位</text>
+        <text class="row-value">{{info.waterLevel || '未填写'}}</text>
+      </view>
+      <view class="row">
+        <text class="row-label">🌬️ 风浪</text>
+        <text class="row-value">{{info.windWave || '未填写'}}</text>
+      </view>
+      <view class="row">
         <text class="row-label">🅿️ 停车情况</text>
         <text class="row-value">{{info.park || '未填写'}}</text>
       </view>
     </view>
 
-    <!-- 该钓点实时天气（使用钓点自身坐标） -->
+    <!-- 钓点实时天气（使用钓点自身坐标，展示具体地址） -->
     <view class="card">
-      <view class="card-title">🌤 该钓点实时天气</view>
+      <view class="card-title">🌤 钓点实时天气</view>
+      <view class="w-addr" wx:if="{{weatherAddr || weather.place}}">📍 {{weatherAddr || weather.place}}</view>
       <block wx:if="{{weatherStatus === 'loading'}}">
         <view class="w-loading">
           <view class="w-spinner"></view>
-          <text>正在获取该钓点天气...</text>
+          <text>正在获取天气...</text>
         </view>
       </block>
       <block wx:elif="{{weatherStatus === 'ok' && weather}}">
@@ -71,10 +96,10 @@
         </view>
       </block>
       <block wx:elif="{{weatherStatus === 'nopos'}}">
-        <view class="w-fail">该钓点未保存位置信息，无法获取天气</view>
+        <view class="w-fail">未保存位置信息，无法获取天气</view>
       </block>
       <block wx:else>
-        <view class="w-fail">🌥 {{weatherError || '该钓点天气暂时不可用，可稍后刷新'}}</view>
+        <view class="w-fail">🌥 {{weatherError || '天气暂时不可用，可稍后刷新'}}</view>
         <view class="w-refresh" bindtap="onRefreshWeather" hover-class="w-btn-hover">🔄 刷新</view>
       </block>
     </view>
@@ -87,6 +112,30 @@
       </view>
     </view>
 
+    <!-- 钓获鱼种 -->
+    <view class="card" wx:if="{{info.fishCaught && info.fishCaught.length}}">
+      <view class="card-title">🐟 钓获鱼种</view>
+      <view class="fish-chips">
+        <view class="chip" wx:for="{{info.fishCaught}}" wx:key="*this">{{item}}</view>
+      </view>
+    </view>
+
+    <!-- 保存时天气记录（新增钓点时自动存入） -->
+    <view class="card" wx:if="{{info.weatherSnap}}">
+      <view class="card-title">🌤 保存时天气记录</view>
+      <view class="w-snap">
+        <view class="w-snap-main">
+          <view class="w-snap-emoji">{{info.weatherSnapEmoji}}</view>
+          <view class="w-snap-info">
+            <view class="w-snap-temp">{{info.weatherSnap.temp || '--'}}°</view>
+            <view class="w-snap-text">{{info.weatherSnap.text || '--'}} · {{info.weatherSnap.windDir || ''}}{{info.weatherSnap.windScale || ''}} · 湿度{{info.weatherSnap.humidity || '--'}}</view>
+            <view class="w-snap-place" wx:if="{{info.weatherSnap.place}}">📍 {{info.weatherSnap.place}}</view>
+          </view>
+        </view>
+        <view class="w-snap-time" wx:if="{{info.weatherSnap.updateTime}}">记录于 {{info.weatherSnap.updateTime}}</view>
+      </view>
+    </view>
+
     <!-- 钓点备注 -->
     <view class="card" wx:if="{{info.remark}}">
       <view class="card-title">📝 钓点备注</view>
@@ -94,12 +143,237 @@
     </view>
   </view>
 
+  <!-- ==================== 编辑模式 ==================== -->
+  <view wx:else class="content">
+    <!-- 基本信息 -->
+    <view class="form-card">
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">📍</text>
+          <text>钓点名称</text>
+          <text class="required">*</text>
+        </view>
+        <input class="input" bindinput="onInput" data-key="name" value="{{form.name}}" placeholder="输入钓点名称" placeholder-class="placeholder"/>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">💰</text>
+          <text>收费类型</text>
+          <text class="required">*</text>
+        </view>
+        <view class="tag-group">
+          <view wx:for="{{feeTypeArr}}" wx:key="*this" class="tag {{feeTypeIdx==index?'tag-active':''}}" data-index="{{index}}" bindtap="onTagTap">{{item}}</view>
+        </view>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">🌊</text>
+          <text>河道类型</text>
+        </view>
+        <picker class="picker-full" range="{{waterTypeArr}}" range-key="label" value="{{waterTypeIdx}}" bindchange="onWaterTypePicker">
+          <view class="select {{waterTypeIdx>-1?'select-active':''}}">
+            <text class="select-value {{waterTypeIdx>-1?'':'placeholder'}}">{{form.waterType || '请选择河道类型'}}</text>
+            <text class="select-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">🐟</text>
+          <text>目标鱼种</text>
+        </view>
+        <view class="select" bindtap="openFishPanel">
+          <view class="fish-chips" wx:if="{{fishSelected.length}}">
+            <view class="fish-chip" wx:for="{{fishSelected}}" wx:key="*this">
+              {{item}}
+              <text class="fish-chip-del" catchtap="removeFish" data-index="{{index}}">×</text>
+            </view>
+          </view>
+          <text class="select-value placeholder" wx:else>请选择目标鱼种（可多选）</text>
+          <text class="select-arrow">›</text>
+        </view>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">🕐</text>
+          <text>作钓时间</text>
+        </view>
+        <picker class="picker-full" range="{{fishTimeArr}}" value="{{fishTimeIdx}}" bindchange="onFishTimePicker">
+          <view class="select {{fishTimeIdx>-1?'select-active':''}}">
+            <text class="select-value {{fishTimeIdx>-1?'':'placeholder'}}">{{form.fishTime || '请选择作钓时间'}}</text>
+            <text class="select-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">🪱</text>
+          <text>饵料</text>
+        </view>
+        <input class="input" bindinput="onInput" data-key="bait" value="{{form.bait}}" placeholder="如：商品饵、蚯蚓、玉米" placeholder-class="placeholder"/>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">🌊</text>
+          <text>水位</text>
+        </view>
+        <picker class="picker-full" range="{{waterLevelArr}}" value="{{waterLevelIdx}}" bindchange="onWaterLevelPicker">
+          <view class="select {{waterLevelIdx>-1?'select-active':''}}">
+            <text class="select-value {{waterLevelIdx>-1?'':'placeholder'}}">{{form.waterLevel || '请选择水位'}}</text>
+            <text class="select-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">🌬️</text>
+          <text>风浪</text>
+        </view>
+        <picker class="picker-full" range="{{windWaveArr}}" value="{{windWaveIdx}}" bindchange="onWindWavePicker">
+          <view class="select {{windWaveIdx>-1?'select-active':''}}">
+            <text class="select-value {{windWaveIdx>-1?'':'placeholder'}}">{{form.windWave || '请选择风浪'}}</text>
+            <text class="select-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">📏</text>
+          <text>水深（米）</text>
+        </view>
+        <input class="input" type="digit" bindinput="onInput" data-key="depth" value="{{form.depth}}" placeholder="如：2.5" placeholder-class="placeholder"/>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">🅿️</text>
+          <text>停车情况</text>
+        </view>
+        <input class="input" bindinput="onInput" data-key="park" value="{{form.park}}" placeholder="方便/不便/无车位" placeholder-class="placeholder"/>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">📝</text>
+          <text>鱼情备注</text>
+        </view>
+        <textarea class="textarea" bindinput="onInput" data-key="remark" value="{{form.remark}}" placeholder="描述鱼情、钓位、装备建议等" placeholder-class="placeholder"></textarea>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">🚦</text>
+          <text>钓点状态</text>
+        </view>
+        <view class="tag-group">
+          <view wx:for="{{statusArr}}" wx:key="*this" class="tag {{statusIdx==index?'tag-active':''}}" data-index="{{index}}" bindtap="onStatusTap">{{item}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 位置与图片 -->
+    <view class="form-card">
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">🗺️</text>
+          <text>地图选点</text>
+          <text class="required">*</text>
+        </view>
+        <view wx:if="{{form.longitude}}" class="map-preview-wrap" bindtap="selectMapPoint">
+          <map class="map-preview" latitude="{{form.latitude}}" longitude="{{form.longitude}}" scale="15" markers="{{mapMarkers}}"/>
+          <view class="map-preview-footer">
+            <view class="map-preview-btn">重新选点</view>
+          </view>
+        </view>
+        <view wx:else class="map-picker" bindtap="selectMapPoint">
+          <view class="map-picker-title">点击在地图上选取位置</view>
+        </view>
+      </view>
+
+      <view class="form-item">
+        <view class="label">
+          <text class="label-icon">📷</text>
+          <text>实拍图片</text>
+          <text class="count" wx:if="{{tempImages.length}}">{{tempImages.length}}/6</text>
+        </view>
+        <view class="img-grid">
+          <view class="img-item" wx:for="{{tempImages}}" wx:key="*this">
+            <image src="{{item}}" class="preview-img" mode="aspectFill" bindtap="previewEditImg" data-url="{{item}}"/>
+            <view class="img-del" catchtap="removeEditImg" data-index="{{index}}">×</view>
+          </view>
+          <view wx:if="{{tempImages.length<6}}" class="add-img" bindtap="chooseEditImg">
+            <text class="add-plus">+</text>
+            <text class="add-text">添加图片</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="tip">带 * 为必填项，保存后立即生效</view>
+  </view>
+
   <!-- 底部操作按钮 -->
   <view class="footer">
-    <view class="footer-row">
-      <button wx:if="{{info.canEdit}}" bindtap="editPoint" class="edit-btn" hover-class="btn-hover">✏️ 编辑</button>
+    <view class="footer-row" wx:if="{{isEdit}}">
+      <button bindtap="cancelEdit" class="cancel-btn" hover-class="btn-hover">取消</button>
+      <button bindtap="saveEdit" class="save-btn" hover-class="btn-hover" loading="{{saving}}" disabled="{{saving}}">保存修改</button>
+    </view>
+    <view class="footer-row" wx:else>
+      <button wx:if="{{info.canEdit}}" bindtap="startEdit" class="edit-btn" hover-class="btn-hover">✏️ 编辑</button>
       <button wx:if="{{info.canEdit && !info.teamId}}" bindtap="moveToTeam" class="move-btn" hover-class="btn-hover">📦 移到团队</button>
       <button bindtap="openNav" class="nav-btn" hover-class="btn-hover">📍 立即导航前往</button>
+    </view>
+  </view>
+
+  <!-- 目标鱼种多选面板 -->
+  <view class="mask" wx:if="{{showFishPanel}}" bindtap="closeFishPanel"></view>
+  <view class="panel {{showFishPanel?'panel-show':''}}">
+    <view class="panel-header">
+      <text class="panel-title">选择目标鱼种</text>
+      <text class="panel-close" bindtap="closeFishPanel">×</text>
+    </view>
+    <scroll-view scroll-y class="panel-body">
+      <view class="fish-option {{item.checked?'fish-option-active':''}}" wx:for="{{panelOptions}}" wx:key="value" data-value="{{item.value}}" bindtap="onFishToggle">
+        <text>{{item.label}}</text>
+        <view class="check">{{item.checked?'✓':''}}</view>
+      </view>
+    </scroll-view>
+    <view class="panel-footer">
+      <button class="panel-btn" hover-class="btn-hover" bindtap="confirmFish">确定（已选 {{panelCount}} 种）</button>
+    </view>
+  </view>
+
+  <!-- 自定义地图选点弹层：搜索 + 点击地图/十字选点 -->
+  <view class="map-mask" wx:if="{{showMapPicker}}">
+    <view class="map-picker-panel">
+      <view class="map-picker-header">
+        <text class="map-picker-title">搜索并在地图上选点</text>
+        <text class="map-picker-close" bindtap="closeMapPicker">×</text>
+      </view>
+      <!-- 搜索 -->
+      <view class="map-search">
+        <input class="map-search-input" placeholder="搜索地点，如：朝阳公园" value="{{searchKeyword}}" confirm-type="search" bindinput="onSearchInput" bindconfirm="searchPlaces" placeholder-class="placeholder"/>
+        <view class="map-search-btn" bindtap="searchPlaces">搜索</view>
+      </view>
+      <!-- 搜索结果 -->
+      <scroll-view wx:if="{{searchResults.length}}" scroll-y class="map-search-list">
+        <view class="map-search-item" wx:for="{{searchResults}}" wx:key="id" data-index="{{index}}" bindtap="onResultTap">
+          <view class="map-search-title">{{item.title}}</view>
+          <view class="map-search-addr">{{item.address}}</view>
+        </view>
+      </scroll-view>
+      <map class="map-full" latitude="{{pickerLat}}" longitude="{{pickerLng}}" scale="15" markers="{{mapMarkers}}" show-location bindtap="onMapTap"/>
+      <view class="map-picker-footer">
+        <button class="map-picker-confirm" hover-class="btn-hover" bindtap="confirmMapPick">确定选点</button>
+      </view>
     </view>
   </view>
 </view>

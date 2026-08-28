@@ -1,0 +1,9 @@
+{
+  "name": "loginService",
+  "version": "1.0.0",
+  "description": "微信静默登录：openid 鉴权 + user 集合自动建档",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

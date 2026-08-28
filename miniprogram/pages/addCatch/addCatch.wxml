@@ -1,0 +1,165 @@
+<view class="page">
+  <!-- 添加鱼种 -->
+  <view class="section">
+    <view class="section-header">
+      <view class="section-title-row">
+        <text class="section-title">添加鱼种</text>
+        <text class="section-tag">仅自己可见</text>
+      </view>
+      <view class="section-sub">选鱼后填写数量等信息，再加入本次出勤</view>
+    </view>
+    <scroll-view scroll-x class="fish-scroll" enhanced show-scrollbar="{{false}}">
+      <view class="fish-list">
+        <view class="fish-item {{fishIdx===index?'fish-active':''}}" wx:for="{{fishOptions}}" wx:key="name" data-index="{{index}}" bindtap="onFishTap">
+          <view class="fish-circle" style="background: {{item.bg}}">
+            <view class="fish-glyph">
+              <view class="fish-body" style="border-color: {{item.stroke}}"></view>
+              <view class="fish-tail" style="border-color: {{item.stroke}}"></view>
+            </view>
+          </view>
+          <view class="fish-name">{{item.name}}</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 鱼种信息卡 -->
+  <view class="info-card">
+    <view class="info-glyph">
+      <view class="fish-circle info-fish-circle" style="background: {{fishOptions[fishIdx].bg}}">
+        <view class="fish-glyph">
+          <view class="fish-body" style="border-color: {{fishOptions[fishIdx].stroke}}"></view>
+          <view class="fish-tail" style="border-color: {{fishOptions[fishIdx].stroke}}"></view>
+        </view>
+      </view>
+    </view>
+    <view class="info-main">
+      <view class="info-name">{{fishOptions[fishIdx].fullName}}</view>
+      <view class="info-desc">{{fishOptions[fishIdx].desc}}</view>
+      <view class="info-tip">{{fishOptions[fishIdx].tip}}</view>
+    </view>
+  </view>
+
+  <!-- 数量 -->
+  <view class="form-row">
+    <view class="form-label">
+      <view class="form-title">数量</view>
+      <view class="form-sub">本鱼种钓获多少条</view>
+    </view>
+    <view class="stepper">
+      <view class="step-btn" data-op="minus" bindtap="onCountChange">－</view>
+      <view class="step-num">{{count}}</view>
+      <view class="step-btn" data-op="plus" bindtap="onCountChange">＋</view>
+    </view>
+  </view>
+
+  <!-- 大约长度 -->
+  <view class="form-row">
+    <view class="form-label">
+      <view class="form-title">大约长度</view>
+      <view class="form-sub">可不填</view>
+    </view>
+    <view class="stepper stepper-input">
+      <view class="step-btn" data-op="minus" data-field="length" bindtap="onLengthStep">－</view>
+      <input class="step-input" type="digit" value="{{lengthCm}}" placeholder="0" bindinput="onLengthInput" />
+      <text class="step-unit">cm</text>
+      <view class="step-btn" data-op="plus" data-field="length" bindtap="onLengthStep">＋</view>
+    </view>
+  </view>
+
+  <!-- 使用的饵 -->
+  <view class="form-row" bindtap="openBaitPanel">
+    <view class="form-label">
+      <view class="form-title">使用的饵</view>
+      <view class="form-sub">后续可统计真实中鱼率</view>
+    </view>
+    <view class="form-value {{baitName?'':'form-placeholder'}}">
+      <text>{{baitName || '请选择'}}</text>
+      <text class="form-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 处理方式 -->
+  <view class="form-row" bindtap="openHandlingPanel">
+    <view class="form-label">
+      <view class="form-title">处理方式</view>
+      <view class="form-sub">记录放流或带走</view>
+    </view>
+    <view class="form-value">
+      <text class="handling-tag {{isReleased?'handling-released':'handling-kept'}}">{{handlingOptions[handlingIdx].label}}</text>
+      <text class="form-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 加入本次出勤 -->
+  <view class="add-trip-btn {{submitting?'add-trip-btn-disabled':''}}" bindtap="submit">
+    <text class="add-trip-icon">+</text>
+    <text>加入本次出勤</text>
+  </view>
+
+  <!-- 记录本次位置 -->
+  <view class="location-section">
+    <view class="location-header">
+      <view class="location-title-wrap">
+        <view class="location-title">记录本次位置</view>
+        <view class="location-sub">默认开启，可随时关闭</view>
+      </view>
+      <switch class="location-switch" checked="{{recordLocation}}" bindchange="onLocationToggle" color="#1677ff" />
+    </view>
+    <view class="location-tip">开启后，仅为本次出勤记录定位信息。</view>
+
+    <view class="location-card" wx:if="{{recordLocation}}">
+      <view class="location-icon">⊕</view>
+      <view class="location-main" wx:if="{{locationName}}">
+        <view class="location-name">{{locationName}}</view>
+        <view class="location-address">{{locationAddress}}</view>
+        <view class="location-meta">已关联统一位置 ID</view>
+      </view>
+      <view class="location-main" wx:else>
+        <view class="location-empty">尚未选择位置</view>
+      </view>
+    </view>
+
+    <view class="location-actions" wx:if="{{recordLocation}}">
+      <view class="loc-action" bindtap="onCurrentLocation">当前位置</view>
+      <view class="loc-action" bindtap="onMapPicker">地图选点</view>
+      <view class="loc-action loc-action-primary" bindtap="onMyFavorites">我的收藏</view>
+    </view>
+  </view>
+
+  <!-- 底部占位，避免被固定栏遮挡（本页无固定栏，但保持安全距离） -->
+  <view class="safe-bottom"></view>
+</view>
+
+<!-- 饵料选择面板 -->
+<view class="mask" wx:if="{{showBaitPanel}}" bindtap="closeBaitPanel"></view>
+<view class="panel {{showBaitPanel?'panel-show':''}}">
+  <view class="panel-header">
+    <text class="panel-title">选择使用的饵</text>
+    <text class="panel-close" bindtap="closeBaitPanel">×</text>
+  </view>
+  <scroll-view scroll-y class="panel-body">
+    <view class="panel-option {{baitIdx===index?'panel-option-active':''}}" wx:for="{{baitOptions}}" wx:key="*this" data-index="{{index}}" bindtap="onBaitTap">
+      <text>{{item}}</text>
+      <view class="panel-check">{{baitIdx===index?'✓':''}}</view>
+    </view>
+  </scroll-view>
+</view>
+
+<!-- 处理方式选择面板 -->
+<view class="mask" wx:if="{{showHandlingPanel}}" bindtap="closeHandlingPanel"></view>
+<view class="panel {{showHandlingPanel?'panel-show':''}}">
+  <view class="panel-header">
+    <text class="panel-title">选择处理方式</text>
+    <text class="panel-close" bindtap="closeHandlingPanel">×</text>
+  </view>
+  <scroll-view scroll-y class="panel-body">
+    <view class="panel-option handling-option {{handlingIdx===index?'panel-option-active':''}}" wx:for="{{handlingOptions}}" wx:key="value" data-index="{{index}}" bindtap="onHandlingTap">
+      <view class="handling-option-main">
+        <text class="handling-option-label">{{item.label}}</text>
+        <text class="handling-option-sub">{{item.sub}}</text>
+      </view>
+      <view class="panel-check">{{handlingIdx===index?'✓':''}}</view>
+    </view>
+  </scroll-view>
+</view>

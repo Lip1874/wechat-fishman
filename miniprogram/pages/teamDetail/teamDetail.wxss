@@ -1,0 +1,456 @@
+.page {
+  position: relative;
+  padding: 24rpx 20rpx 40rpx;
+  min-height: 100vh;
+  background: #f5f7fa;
+  box-sizing: border-box;
+}
+
+/* 头部 */
+.header-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+}
+.header-icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 20rpx;
+  background: #e6f4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 46rpx;
+  margin-right: 22rpx;
+  flex-shrink: 0;
+}
+.header-info {
+  flex: 1;
+  min-width: 0;
+}
+.team-name {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1f2329;
+}
+.team-meta {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+.header-btn {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: #1677ff;
+  background: rgba(22, 119, 255, 0.08);
+  padding: 10rpx 22rpx;
+  border-radius: 30rpx;
+}
+
+/* 区块卡片 */
+.section {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #222;
+}
+.section-count {
+  font-size: 24rpx;
+  color: #999;
+}
+.section-edit {
+  font-size: 24rpx;
+  color: #1677ff;
+  padding: 6rpx 18rpx;
+  background: rgba(22, 119, 255, 0.08);
+  border-radius: 26rpx;
+}
+.section-add {
+  font-size: 24rpx;
+  color: #1677ff;
+  padding: 6rpx 18rpx;
+  background: rgba(22, 119, 255, 0.08);
+  border-radius: 26rpx;
+}
+
+/* 永不空军同步提示 */
+.sync-tip {
+  display: flex;
+  align-items: center;
+  background: #fff7e6;
+  border: 2rpx solid #ffe7ba;
+  border-radius: 14rpx;
+  padding: 14rpx 18rpx;
+  margin-bottom: 20rpx;
+}
+.sync-tip-icon {
+  font-size: 24rpx;
+  margin-right: 10rpx;
+}
+.sync-tip-text {
+  flex: 1;
+  font-size: 23rpx;
+  color: #ad6800;
+  line-height: 1.5;
+}
+
+/* 公告 */
+.announcement {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.7;
+  background: #fafafa;
+  border-radius: 14rpx;
+  padding: 20rpx 22rpx;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 公告编辑弹层 */
+.mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 90;
+}
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: 28rpx 28rpx 0 0;
+  padding: 28rpx 28rpx calc(40rpx + env(safe-area-inset-bottom));
+  z-index: 99;
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.sheet-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #222;
+}
+.sheet-close {
+  font-size: 32rpx;
+  color: #999;
+  padding: 6rpx;
+}
+.announcement-input {
+  width: 100%;
+  min-height: 160rpx;
+  box-sizing: border-box;
+  background: #f7f8fa;
+  border-radius: 14rpx;
+  padding: 20rpx;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+.sheet-btn {
+  margin-top: 24rpx;
+  background: linear-gradient(90deg, #1677ff 0%, #4096ff 100%);
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 600;
+  text-align: center;
+  padding: 20rpx 0;
+  border-radius: 44rpx;
+  box-shadow: 0 8rpx 20rpx rgba(22, 119, 255, 0.3);
+}
+
+/* 成员管理 */
+.member-row {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f5f6f8;
+}
+.member-row:last-child {
+  border-bottom: none;
+}
+.member-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+  background: #f0f3f7;
+}
+.member-avatar-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+}
+.member-name {
+  font-size: 28rpx;
+  color: #333;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.member-tag {
+  font-size: 20rpx;
+  color: #1677ff;
+  background: rgba(22, 119, 255, 0.08);
+  padding: 4rpx 14rpx;
+  border-radius: 18rpx;
+  margin-left: 10rpx;
+  flex-shrink: 0;
+}
+.self-tag {
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.1);
+}
+.member-del {
+  font-size: 22rpx;
+  color: #e64340;
+  border: 2rpx solid rgba(230, 67, 64, 0.4);
+  padding: 6rpx 20rpx;
+  border-radius: 24rpx;
+  margin-left: 12rpx;
+  flex-shrink: 0;
+}
+.team-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 22rpx;
+}
+.btn-invite {
+  flex: 1;
+  background: linear-gradient(90deg, #1677ff 0%, #4096ff 100%);
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  height: 76rpx;
+  line-height: 76rpx;
+}
+.btn-invite::after {
+  border: none;
+}
+.btn-danger {
+  flex: 1;
+  background: #fff;
+  color: #e64340;
+  border: 2rpx solid rgba(230, 67, 64, 0.4);
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* 共享钓点清单 */
+.point-item {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f5f6f8;
+}
+.point-item:last-child {
+  border-bottom: none;
+}
+.point-cover {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 14rpx;
+  overflow: hidden;
+  margin-right: 18rpx;
+  flex-shrink: 0;
+}
+.point-img {
+  width: 100%;
+  height: 100%;
+}
+.point-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e6f4ff;
+  font-size: 44rpx;
+}
+.point-info {
+  flex: 1;
+  min-width: 0;
+}
+.point-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #222;
+}
+.point-invalid {
+  font-size: 20rpx;
+  color: #999;
+  background: #f2f3f5;
+  border-radius: 12rpx;
+  padding: 2rpx 10rpx;
+  margin-left: 10rpx;
+  font-weight: 400;
+}
+.point-tags {
+  display: flex;
+  align-items: center;
+  margin-top: 8rpx;
+}
+.point-tag {
+  font-size: 20rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 16rpx;
+  margin-right: 10rpx;
+  color: #fff;
+}
+.fee-green { background: #52c41a; }
+.fee-orange { background: #fa8c16; }
+.fee-blue { background: #1677ff; }
+.fee-red { background: #e64340; }
+.tag-gray { background: #b0b4bb; }
+.point-fish {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8rpx;
+}
+.point-fish-chip {
+  font-size: 20rpx;
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.08);
+  border-radius: 14rpx;
+  padding: 2rpx 12rpx;
+  margin: 4rpx 8rpx 4rpx 0;
+}
+.point-fish-more {
+  font-size: 20rpx;
+  color: #999;
+  margin-left: 2rpx;
+}
+.point-creator {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+.point-arrow {
+  font-size: 34rpx;
+  color: #c0c4cc;
+  margin-left: 12rpx;
+  flex-shrink: 0;
+}
+
+/* 渔获汇总 */
+.catch-stats {
+  display: flex;
+  background: linear-gradient(135deg, #e6f4ff 0%, #f0f7ff 100%);
+  border-radius: 16rpx;
+  padding: 24rpx 0;
+  margin-bottom: 20rpx;
+}
+.catch-stat {
+  flex: 1;
+  text-align: center;
+}
+.catch-num {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #1677ff;
+}
+.catch-label {
+  font-size: 22rpx;
+  color: #666;
+  margin-top: 6rpx;
+}
+.catch-sub-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 14rpx;
+}
+.catch-species {
+  margin-bottom: 20rpx;
+}
+.species-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+.species-chip {
+  font-size: 24rpx;
+  color: #1677ff;
+  background: rgba(22, 119, 255, 0.08);
+  border-radius: 16rpx;
+  padding: 8rpx 20rpx;
+  margin: 0 12rpx 12rpx 0;
+}
+.recent-row {
+  display: flex;
+  align-items: center;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #f5f6f8;
+  flex-wrap: wrap;
+}
+.recent-row:last-child {
+  border-bottom: none;
+}
+.recent-fish {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-right: 16rpx;
+}
+.recent-meta {
+  font-size: 22rpx;
+  color: #999;
+  margin-right: 14rpx;
+}
+
+/* 空态与通用 */
+.empty-inner {
+  font-size: 28rpx;
+  color: #666;
+  text-align: center;
+  padding: 24rpx 0 8rpx;
+}
+.empty-inner-sub {
+  font-size: 23rpx;
+  color: #b0b4bb;
+  text-align: center;
+  padding: 0 0 24rpx;
+}
+.loading-text {
+  text-align: center;
+  color: #999;
+  font-size: 24rpx;
+  padding: 24rpx 0;
+}
+.foot-space {
+  height: 20rpx;
+}
+
+.btn-hover {
+  opacity: 0.85;
+}

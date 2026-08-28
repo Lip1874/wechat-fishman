@@ -1,70 +1,76 @@
 <view class="page">
-  <!-- 顶部绿色头部 -->
+  <!-- 顶部头部 -->
   <view class="header">
-    <view class="header-deco"></view>
-    <view class="header-deco2"></view>
-    <view class="bubble b1"></view>
-    <view class="bubble b2"></view>
-    <view class="bubble b3"></view>
     <view class="header-left">
       <view class="header-title-row">
         <view class="header-icon">🎣</view>
         <view class="header-title">{{batchMode ? '已选 ' + selectedIds.length + ' 项' : '钓点列表'}}</view>
       </view>
-      <view class="header-sub">{{batchMode ? '再次点击列表项可取消选择' : currentTitle + ' · 共 ' + filteredList.length + ' 个钓点'}}</view>
+      <view class="header-sub">{{batchMode ? '再次点击列表项可取消选择' : currentTitle + ' · 共 ' + total + ' 个钓点'}}</view>
     </view>
     <view class="header-btns">
       <view wx:if="{{!batchMode}}" class="map-btn" bindtap="goMapPage" hover-class="map-btn-hover">🗺️ 附近钓点</view>
       <view class="map-btn" bindtap="toggleBatch" hover-class="map-btn-hover">{{batchMode ? '✕ 取消' : '☑️ 批量'}}</view>
     </view>
-    <view class="header-wave"></view>
-    <view class="header-wave2"></view>
   </view>
 
   <!-- 模式/团队切换器 -->
   <view class="mode-bar">
     <scroll-view scroll-x class="mode-scroll" show-scrollbar="{{false}}" enhanced>
       <view class="mode-group">
-        <view class="mode-item {{mode=='private'?'mode-active':''}}" bindtap="switchPrivate">🔒 我的私有</view>
-        <view
-          wx:for="{{myTeams}}"
-          wx:key="_id"
-          class="mode-item {{mode=='team' && teamId==item._id?'mode-active':''}}"
-          data-id="{{item._id}}"
-          bindtap="switchTeam"
-        >👥 {{item.teamName}}</view>
+        <view class="mode-item {{mode=='private'?'mode-active':''}}" bindtap="switchPrivate">🔒 私有钓点</view>
+        <view class="mode-item {{mode=='neverEmpty'?'mode-active':''}}" bindtap="switchNeverEmpty">🐟 永不空军</view>
       </view>
     </scroll-view>
-    <view class="mode-manage" bindtap="goTeamList" hover-class="map-btn-hover">管理</view>
+    <!-- 管理按钮：团队钓点 / 永不空军分组时展示 -->
+    <view wx:if="{{mode=='neverEmpty'}}" class="mode-manage mode-manage-active" bindtap="goTeamList" hover-class="map-btn-hover">管理</view>
+  </view>
+
+  <!-- 搜索框：按钓点名称 / 备注模糊搜索（查询在云函数端执行） -->
+  <view class="search-bar">
+    <view class="search-box">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        placeholder="搜索钓点名称 / 备注"
+        placeholder-class="search-placeholder"
+        confirm-type="search"
+        value="{{keyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearchConfirm"
+      />
+      <view wx:if="{{keyword}}" class="search-clear" catchtap="onSearchClear">✕</view>
+      <view class="search-btn" bindtap="onSearchConfirm" hover-class="map-btn-hover">搜索</view>
+    </view>
   </view>
 
   <!-- 筛选面板 -->
   <view class="filter-panel">
-    <scroll-view scroll-x class="fee-scroll" show-scrollbar="{{false}}" enhanced>
-      <view class="fee-group">
-        <view
-          wx:for="{{feeFilterArr}}"
-          wx:key="*this"
-          class="fee-tab {{feeFilter==item?'fee-tab-active':''}}"
-          data-val="{{item}}"
-          bindtap="onFeeFilter"
-        >{{item}}</view>
+    <!-- 一级收费标签（横向滚动）+ 更多筛选入口 -->
+    <view class="fee-row">
+      <scroll-view scroll-x class="fee-scroll" show-scrollbar="{{false}}" enhanced>
+        <view class="fee-group">
+          <view
+            wx:for="{{feeFilterArr}}"
+            wx:key="*this"
+            class="fee-tab {{feeFilter==item?'fee-tab-active':''}}"
+            data-val="{{item}}"
+            bindtap="onFeeFilter"
+          >{{item}}</view>
+        </view>
+      </scroll-view>
+      <view class="more-btn {{filterCount?'more-btn-on':''}}" bindtap="openFilterPopup" hover-class="map-btn-hover">
+        <text class="more-text">更多筛选</text>
+        <text class="more-badge" wx:if="{{filterCount}}">{{filterCount}}</text>
+        <text class="more-arrow">▾</text>
       </view>
-    </scroll-view>
-    <view class="filter-row">
-      <picker class="filter-picker" range="{{waterTypeFilterArr}}" range-key="label" value="{{waterTypeFilterIdx}}" bindchange="onWaterTypeFilter">
-        <view class="filter-select">
-          <text class="filter-text {{waterTypeFilter?'':'filter-placeholder'}}">{{waterTypeFilter ? waterTypeFilter.label : '水域类型'}}</text>
-          <text class="filter-arrow">▾</text>
-        </view>
-      </picker>
-      <picker class="filter-picker" range="{{fishFilterArr}}" range-key="label" value="{{fishFilterIdx}}" bindchange="onFishFilter">
-        <view class="filter-select">
-          <text class="filter-text {{fishFilter?'':'filter-placeholder'}}">{{fishFilter ? fishFilter.label : '目标鱼种'}}</text>
-          <text class="filter-arrow">▾</text>
-        </view>
-      </picker>
     </view>
+    <!-- 已选筛选标签 + 一键清空 -->
+    <view class="filter-tags" wx:if="{{activeFilterTags.length}}">
+      <view class="ft-tag" wx:for="{{activeFilterTags}}" wx:key="key" data-key="{{item.key}}" bindtap="onRemoveFilterTag">{{item.label}} <text class="ft-x">✕</text></view>
+      <view class="ft-clear" bindtap="onClearFilters" hover-class="map-btn-hover">一键清空</view>
+    </view>
+    <view class="status-hint" wx:if="{{statusFilter=='正常' && hiddenInvalidCount}}">已隐藏 {{hiddenInvalidCount}} 个作废钓点，可在「更多筛选」切换状态查看</view>
   </view>
 
   <!-- 当前位置实况天气卡片 -->
@@ -94,21 +100,33 @@
 
     <!-- 正常展示 -->
     <block wx:elif="{{weatherStatus === 'ok' && weather}}">
-      <!-- 天气预警提示条（无预警隐藏） -->
+      <!-- 天气预警提示条（无预警隐藏；文字精简展示） -->
       <view class="weather-warn" wx:if="{{weather.hasWarn}}" bindtap="onWarnTap" data-index="0">
         <text class="warn-icon">⚠️</text>
-        <text class="warn-text">⚠️ {{weather.warning[0].levelText || ''}}预警：{{weather.warning[0].headline}}</text>
+        <text class="warn-text">{{weather.warning[0].brief || weather.warning[0].levelText}}：{{weather.warning[0].headShort || weather.warning[0].headline}}</text>
         <text class="warn-more">详情 ›</text>
       </view>
 
-      <!-- 位置 + 刷新 -->
-      <view class="weather-head">
-        <view class="weather-place">📍 {{weather.place || '当前位置'}}</view>
-        <view class="weather-refresh" bindtap="onRefreshWeather" hover-class="weather-btn-hover">🔄 刷新</view>
+      <!-- 位置 + 刷新 + 折叠开关：点击头部展开/收起详情，避免天气卡片挤压钓点列表 -->
+      <view class="weather-head" bindtap="onWeatherToggle" hover-class="weather-btn-hover">
+        <view class="weather-place">📍 {{weatherAddr || weather.place || '当前位置'}}</view>
+        <view class="weather-refresh" catchtap="onRefreshWeather" hover-class="weather-btn-hover">🔄 刷新</view>
+        <view class="weather-toggle">{{weatherCollapsed ? '展开 ▾' : '收起 ▴'}}</view>
       </view>
 
-      <!-- 主区域：温度 / 天气描述 / 体感 -->
-      <view class="weather-main">
+      <!-- 折叠态：一行摘要，保证钓点列表有足够展示空间 -->
+      <view wx:if="{{weatherCollapsed}}" class="weather-collapsed">
+        <text class="weather-collapsed-icon">{{weather.emoji}}</text>
+        <text class="weather-collapsed-temp">{{weather.temp}}°</text>
+        <text class="weather-collapsed-text">{{weather.text}}</text>
+        <text class="weather-collapsed-meta" wx:if="{{weather.windDir || weather.windScale}}">{{weather.windDir}} {{weather.windScale}}</text>
+        <text class="weather-collapsed-meta" wx:if="{{weather.humidity}}">湿度 {{weather.humidity}}</text>
+      </view>
+
+      <!-- 展开态：完整天气详情 -->
+      <block wx:else>
+        <!-- 主区域：温度 / 天气描述 / 体感 -->
+        <view class="weather-main">
         <view class="weather-icon">{{weather.emoji}}</view>
         <view class="weather-info">
           <view class="weather-temp">{{weather.temp}}<text class="weather-deg">°</text></view>
@@ -134,6 +152,20 @@
         <view class="weather-meta-item">
           <text class="meta-icon">👁</text>
           <text class="meta-val">能见度 {{weather.vis}}</text>
+        </view>
+      </view>
+
+      <!-- 潮汐 / 风向预留展示区（潮汐数据暂未接入，先占位） -->
+      <view class="weather-tide">
+        <view class="tide-cell">
+          <text class="tide-icon">💨</text>
+          <text class="tide-label">风向</text>
+          <text class="tide-val">{{weather.windDir || '--'}}{{weather.windScale ? ' ' + weather.windScale : ''}}</text>
+        </view>
+        <view class="tide-cell tide-empty">
+          <text class="tide-icon">🌊</text>
+          <text class="tide-label">潮汐</text>
+          <text class="tide-val">数据待接入</text>
         </view>
       </view>
 
@@ -167,6 +199,7 @@
           <view class="idx-text" wx:else>暂无紫外线指数</view>
         </view>
       </view>
+      </block>
     </block>
 
     <!-- 定位被拒 -->
@@ -182,23 +215,64 @@
     </block>
   </view>
 
-  <!-- 钓点列表 -->
-  <scroll-view scroll-y class="list-scroll" enhanced show-scrollbar="{{false}}">
+  <!-- 钓点列表：普通容器，随页面整体滚动（天气卡片展开后下滑即可看到列表） -->
+  <view class="list-scroll">
     <view class="list-inner">
-      <view wx:if="{{filteredList.length === 0}}" class="empty">
+      <!-- 首次加载中 -->
+      <view wx:if="{{listLoading && !filteredList.length}}" class="empty">
         <view class="empty-icon">🎣</view>
-        <view class="empty-text">没有符合条件的钓点</view>
-        <view class="empty-sub">换个筛选条件，或分享你的第一个钓点</view>
+        <view class="empty-text">正在加载钓点...</view>
+      </view>
+
+      <!-- 加载失败（首页）：友好提示 + 重试 -->
+      <view wx:elif="{{loadError && !filteredList.length}}" class="load-error">
+        <view class="load-error-icon">⚠️</view>
+        <view class="load-error-text">{{loadError}}</view>
+        <view class="load-error-btn" bindtap="onRetry" hover-class="map-btn-hover">重新加载</view>
+      </view>
+
+      <!-- 空状态：区分"隐藏作废" / "筛选无匹配" / "暂无数据" -->
+      <view wx:elif="{{filteredList.length === 0}}" class="empty">
+        <view class="empty-icon">🎣</view>
+        <block wx:if="{{emptyHidden}}">
+          <view class="empty-text">已隐藏 {{hiddenInvalidCount}} 个作废钓点</view>
+          <view class="empty-sub">切换状态为「全部」即可查看</view>
+        </block>
+        <block wx:elif="{{emptyNoTeam}}">
+          <view class="empty-text">还没有加入任何团队</view>
+          <view class="empty-sub">加入团队后，团队钓点会自动同步到「永不空军」分组</view>
+        </block>
+        <block wx:elif="{{emptyNoMatch}}">
+          <view class="empty-text">没有符合条件的钓点</view>
+          <view class="empty-sub">换个筛选条件或搜索关键词试试</view>
+          <view class="empty-btn" bindtap="onClearFilters" hover-class="map-btn-hover">清空筛选</view>
+        </block>
+        <block wx:else>
+          <block wx:if="{{mode === 'team'}}">
+            <view class="empty-text">该团队暂无钓点</view>
+            <view class="empty-sub">点击「+ 添加钓点」或到团队页共享你的钓点</view>
+          </block>
+          <block wx:elif="{{mode === 'neverEmpty'}}">
+            <view class="empty-text">你加入的团队还没有共享钓点</view>
+            <view class="empty-sub">添加团队钓点后会自动同步到这里</view>
+            <view class="empty-btn" bindtap="goTeamList" hover-class="map-btn-hover">去管理团队</view>
+          </block>
+          <block wx:else>
+            <view class="empty-text">暂无钓点</view>
+            <view class="empty-sub">点击右下角 + 添加你的第一个钓点</view>
+          </block>
+        </block>
       </view>
 
       <view wx:for="{{filteredList}}" wx:key="_id" class="swipe-wrap">
         <!-- 左滑后露出的删除按钮（批量模式下隐藏） -->
         <view wx:if="{{!batchMode}}" class="swipe-del" catchtap="onDeleteTap" data-index="{{index}}">删除</view>
-        <!-- 内容层：左滑跟手位移，展开态固定偏移 -->
+        <!-- 内容层：左滑跟手位移，展开态固定偏移；长按唤起批量管理 -->
         <view
-          class="swipe-item {{batchMode?'batch-item':''}} {{selectedMap[item._id]?'batch-item-on':''}} {{index===swipeIdx?'swipe-open':''}} {{touchIdx===index?'swipe-no-anim':''}}"
+          class="swipe-item {{batchMode?'batch-item':''}} {{selectedMap[item._id]?'batch-item-on':''}} {{index===swipeIdx?'swipe-open':''}} {{touchIdx===index?'swipe-no-anim':''}} {{item.invalid?'item-invalid':''}}"
           style="transform: translateX({{index===swipeIdx ? -160 : (index===touchIdx ? swipeX : 0)}}rpx)"
           bindtap="goDetail" data-id="{{item._id}}" data-index="{{index}}"
+          bindlongpress="onItemLongPress"
           hover-class="item-hover" hover-stay-time="80"
           bindtouchstart="onSwipeStart" bindtouchmove="onSwipeMove" bindtouchend="onSwipeEnd"
         >
@@ -212,24 +286,39 @@
           </view>
           <view class="item-info">
             <view class="item-head">
-              <view class="title">{{item.name}}</view>
-              <view class="dist" wx:if="{{item.distance}}">{{item.distance}}</view>
+              <view class="title {{item.invalid?'title-invalid':''}}">{{item.name}}</view>
+              <view class="recent-badge" wx:if="{{item.recentCatch}}">🎣 近期上鱼</view>
+              <view class="dist {{item.distFar?'dist-far':''}}" wx:if="{{item.distance}}">{{item.distance}}</view>
             </view>
             <view class="tags">
               <view class="tag {{item.feeClass}}">{{item.feeType}}</view>
               <view class="tag tag-gray" wx:if="{{item.waterType}}">{{item.waterType}}</view>
+              <view class="tag tag-invalid" wx:if="{{item.invalid}}">已作废</view>
             </view>
             <view class="fish-row" wx:if="{{item.fishPreview.length}}">
               <view class="fish-chip" wx:for="{{item.fishPreview}}" wx:key="*this">{{item}}</view>
               <view class="fish-more" wx:if="{{item.fishMore}}">+{{item.fishMore}}</view>
             </view>
-            <view class="record" wx:if="{{mode=='team' && item.creatorShort}}">录入人：{{item.creatorShort}}</view>
+            <view class="record {{item.invalid?'record-invalid':''}}" wx:if="{{mode=='team' && item.creatorShort}}">录入人：{{item.creatorShort}}</view>
+            <view class="record {{item.invalid?'record-invalid':''}}" wx:if="{{mode=='neverEmpty' && item.teamName}}">🏷 {{item.teamName}} · 录入人：{{item.creatorShort}}</view>
+            <!-- 作废钓点：归档/删除快捷入口（批量模式隐藏） -->
+            <view wx:if="{{item.invalid && !batchMode}}" class="invalid-actions">
+              <view class="ia-btn" catchtap="onRestoreTap" data-index="{{index}}">↩️ 恢复</view>
+              <view class="ia-btn ia-del" catchtap="onDeleteTap" data-index="{{index}}">🗑 删除</view>
+            </view>
+            <!-- 正常钓点：归档快捷入口 -->
+            <view wx:if="{{!item.invalid && !batchMode}}" class="archive-entry" catchtap="onArchiveTap" data-index="{{index}}" hover-class="map-btn-hover">归档</view>
           </view>
           <view class="arrow">›</view>
         </view>
       </view>
+
+      <!-- 加载更多 / 到底提示 -->
+      <view wx:if="{{listLoading && filteredList.length}}" class="load-more">加载中...</view>
+      <view wx:elif="{{filteredList.length && !hasMore}}" class="load-more">— 没有更多了 —</view>
+      <view wx:elif="{{filteredList.length && hasMore && loadingMore}}" class="load-more">正在加载更多...</view>
     </view>
-  </scroll-view>
+  </view>
 
   <!-- 批量操作栏 -->
   <view class="batch-bar" wx:if="{{batchMode}}">
@@ -241,5 +330,55 @@
   <!-- 悬浮添加按钮（批量模式下隐藏） -->
   <view wx:if="{{!batchMode}}" class="add-btn" bindtap="goAddPoint" hover-class="add-btn-hover">
     <text class="plus">+</text>
+  </view>
+
+  <!-- 更多筛选弹窗（半屏底部弹出） -->
+  <view class="filter-mask" wx:if="{{filterOpen}}" bindtap="closeFilterPopup"></view>
+  <view class="filter-sheet" wx:if="{{filterOpen}}">
+    <view class="sheet-head">
+      <text class="sheet-title">更多筛选</text>
+      <view class="sheet-clear" bindtap="onClearFilters" hover-class="map-btn-hover">清空</view>
+      <view class="sheet-close" bindtap="closeFilterPopup">✕</view>
+    </view>
+    <scroll-view scroll-y class="sheet-body" show-scrollbar="{{false}}">
+      <view class="sheet-group">
+        <view class="sheet-label">🌊 水域类型</view>
+        <view class="chip-wrap">
+          <view
+            wx:for="{{waterTypeFilterArr}}"
+            wx:key="value"
+            class="chip {{waterTypeValue==item.value?'chip-on':''}}"
+            data-value="{{item.value}}"
+            bindtap="onPopupWaterTap"
+          >{{item.label}}</view>
+        </view>
+      </view>
+      <view class="sheet-group">
+        <view class="sheet-label">🐟 目标鱼种</view>
+        <view class="chip-wrap">
+          <view
+            wx:for="{{fishFilterArr}}"
+            wx:key="value"
+            class="chip {{fishValue==item.value?'chip-on':''}}"
+            data-value="{{item.value}}"
+            bindtap="onPopupFishTap"
+          >{{item.label}}</view>
+        </view>
+      </view>
+      <view class="sheet-group">
+        <view class="sheet-label">🚫 钓点状态</view>
+        <view class="status-group sheet-status">
+          <view
+            wx:for="{{statusFilterArr}}"
+            wx:key="*this"
+            class="status-tab {{statusFilter==item?'status-tab-active':''}}"
+            data-val="{{item}}"
+            bindtap="onStatusFilter"
+          >{{item}}</view>
+        </view>
+        <view class="status-hint" wx:if="{{hiddenInvalidCount}}">已隐藏 {{hiddenInvalidCount}} 个作废钓点</view>
+      </view>
+    </scroll-view>
+    <view class="sheet-foot" bindtap="closeFilterPopup" hover-class="map-btn-hover">完成</view>
   </view>
 </view>

@@ -1,25 +1,38 @@
 .page {
+  position: relative;
   padding: 24rpx 20rpx 180rpx;
   min-height: 100vh;
-  background: #f6f7f9;
+  background: #f5f7fa;
   box-sizing: border-box;
+}
+
+/* 顶部浅蓝背景装饰 */
+.header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 320rpx;
+  background: linear-gradient(180deg, #e6f4ff 0%, #f5f7fa 100%);
+  z-index: 0;
 }
 
 /* 头部 */
 .header-card {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #0aa55e, #008844);
+  background: #fff;
   border-radius: 24rpx;
   padding: 36rpx 32rpx;
-  color: #fff;
   margin-bottom: 24rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 136, 68, 0.25);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
 }
 .header-icon {
   width: 88rpx;
   height: 88rpx;
-  background: rgba(255, 255, 255, 0.2);
+  background: #e6f4ff;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -30,20 +43,23 @@
 .header-title {
   font-size: 36rpx;
   font-weight: 700;
+  color: #1f2329;
 }
 .header-sub {
   font-size: 24rpx;
-  opacity: 0.85;
+  color: #666;
   margin-top: 6rpx;
 }
 
 /* 表单卡片 */
 .form-card {
+  position: relative;
+  z-index: 1;
   background: #fff;
   border-radius: 24rpx;
   padding: 8rpx 24rpx;
   margin-bottom: 24rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.03);
 }
 .form-item {
   padding: 26rpx 0;
@@ -120,8 +136,8 @@
   box-sizing: border-box;
 }
 .select-active {
-  background: rgba(0, 136, 68, 0.06);
-  border: 2rpx solid rgba(0, 136, 68, 0.3);
+  background: rgba(22, 119, 255, 0.06);
+  border: 2rpx solid rgba(22, 119, 255, 0.3);
   box-sizing: border-box;
 }
 .select-value {
@@ -145,8 +161,8 @@
   gap: 12rpx;
 }
 .fish-chip {
-  background: rgba(0, 136, 68, 0.1);
-  color: #008844;
+  background: rgba(22, 119, 255, 0.1);
+  color: #1677ff;
   font-size: 26rpx;
   padding: 8rpx 20rpx;
   border-radius: 30rpx;
@@ -211,7 +227,7 @@
   color: #333;
 }
 .fish-option-active {
-  color: #008844;
+  color: #1677ff;
   font-weight: 600;
 }
 .check {
@@ -226,14 +242,14 @@
   box-sizing: border-box;
 }
 .fish-option-active .check {
-  background: #008844;
-  border-color: #008844;
+  background: #1677ff;
+  border-color: #1677ff;
 }
 .panel-footer {
   margin-top: 24rpx;
 }
 .panel-btn {
-  background: linear-gradient(135deg, #0aa55e, #008844);
+  background: linear-gradient(90deg, #1677ff 0%, #4096ff 100%);
   color: #fff;
   border-radius: 48rpx;
   font-size: 32rpx;
@@ -260,9 +276,9 @@
   border: 2rpx solid transparent;
 }
 .tag-active {
-  background: rgba(0, 136, 68, 0.08);
-  color: #008844;
-  border-color: #008844;
+  background: rgba(22, 119, 255, 0.08);
+  color: #1677ff;
+  border-color: #1677ff;
   font-weight: 600;
 }
 
@@ -283,7 +299,7 @@
 .map-preview-wrap {
   border-radius: 16rpx;
   overflow: hidden;
-  border: 2rpx solid rgba(0, 136, 68, 0.3);
+  border: 2rpx solid rgba(22, 119, 255, 0.3);
   box-sizing: border-box;
 }
 .map-preview {
@@ -296,18 +312,18 @@
   align-items: center;
   justify-content: center;
   padding: 16rpx 24rpx;
-  background: rgba(0, 136, 68, 0.06);
+  background: rgba(22, 119, 255, 0.06);
 }
 .map-preview-btn {
   font-size: 26rpx;
   color: #fff;
-  background: #008844;
+  background: #1677ff;
   border-radius: 30rpx;
   padding: 8rpx 28rpx;
 }
 .map-picker-coord {
   font-size: 22rpx;
-  color: #008844;
+  color: #1677ff;
   margin-top: 8rpx;
 }
 
@@ -367,7 +383,7 @@
 .map-search-btn {
   flex-shrink: 0;
   margin-left: 16rpx;
-  background: #008844;
+  background: #1677ff;
   color: #fff;
   font-size: 26rpx;
   padding: 12rpx 30rpx;
@@ -405,7 +421,7 @@
   background: #fff;
 }
 .map-picker-confirm {
-  background: linear-gradient(135deg, #0aa55e, #008844);
+  background: linear-gradient(90deg, #1677ff 0%, #4096ff 100%);
   color: #fff;
   border-radius: 48rpx;
   font-size: 32rpx;
@@ -484,7 +500,7 @@
   box-shadow: 0 -4rpx 16rpx rgba(0, 0, 0, 0.06);
 }
 .btn-submit {
-  background: linear-gradient(135deg, #0aa55e, #008844);
+  background: linear-gradient(90deg, #1677ff 0%, #4096ff 100%);
   color: #fff;
   border-radius: 48rpx;
   font-size: 32rpx;
@@ -497,4 +513,49 @@
 }
 .btn-hover {
   opacity: 0.85;
+}
+
+/* ---- 天气快照（新增自动记录 / 编辑展示已存记录） ---- */
+.weather-snap {
+  background: #f0f7ff;
+  border: 2rpx solid rgba(22, 119, 255, 0.12);
+  border-radius: 16rpx;
+  padding: 20rpx 24rpx;
+}
+.weather-snap-main {
+  display: flex;
+  align-items: center;
+}
+.weather-snap-emoji {
+  flex-shrink: 0;
+  font-size: 56rpx;
+  margin-right: 20rpx;
+}
+.weather-snap-info {
+  flex: 1;
+  min-width: 0;
+}
+.weather-snap-temp {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #222;
+  line-height: 1.2;
+}
+.weather-snap-text {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 4rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.weather-snap-time {
+  font-size: 22rpx;
+  color: #8a8f99;
+  margin-top: 12rpx;
+}
+.weather-snap-loading {
+  font-size: 22rpx;
+  color: #1677ff;
+  margin-top: 12rpx;
 }

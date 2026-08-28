@@ -1,13 +1,13 @@
 <view class="page">
+  <view class="header-bg"></view>
   <!-- 头部 -->
   <view class="header-card">
     <view class="header-icon">🎣</view>
     <view class="header-info">
-      <view class="header-title">{{isEdit ? '编辑钓点' : (mode=='team' ? '新增团队钓点' : '添加新钓点')}}</view>
+      <view class="header-title">{{mode=='team' ? '新增团队钓点' : '添加新钓点'}}</view>
       <view class="header-sub">
         <text wx:if="{{mode=='team'}}">👥 团队：{{teamName || '加载中...'}}</text>
         <text wx:else>🔒 我的私有钓点</text>
-        <text wx:if="{{creatorShort}}"> · 录入人：{{creatorShort}}</text>
       </view>
     </view>
   </view>
@@ -62,6 +62,53 @@
         <text class="select-value placeholder" wx:else>请选择目标鱼种（可多选）</text>
         <text class="select-arrow">›</text>
       </view>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">🕐</text>
+        <text>作钓时间</text>
+      </view>
+      <picker class="picker-full" range="{{fishTimeArr}}" value="{{fishTimeIdx}}" bindchange="onFishTimePicker">
+        <view class="select {{fishTimeIdx>-1?'select-active':''}}">
+          <text class="select-value {{fishTimeIdx>-1?'':'placeholder'}}">{{form.fishTime || '请选择作钓时间'}}</text>
+          <text class="select-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">🪱</text>
+        <text>饵料</text>
+      </view>
+      <input class="input" bindinput="onInput" data-key="bait" value="{{form.bait}}" placeholder="如：商品饵、蚯蚓、玉米" placeholder-class="placeholder"/>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">🌊</text>
+        <text>水位</text>
+      </view>
+      <picker class="picker-full" range="{{waterLevelArr}}" value="{{waterLevelIdx}}" bindchange="onWaterLevelPicker">
+        <view class="select {{waterLevelIdx>-1?'select-active':''}}">
+          <text class="select-value {{waterLevelIdx>-1?'':'placeholder'}}">{{form.waterLevel || '请选择水位'}}</text>
+          <text class="select-arrow">›</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">🌬️</text>
+        <text>风浪</text>
+      </view>
+      <picker class="picker-full" range="{{windWaveArr}}" value="{{windWaveIdx}}" bindchange="onWindWavePicker">
+        <view class="select {{windWaveIdx>-1?'select-active':''}}">
+          <text class="select-value {{windWaveIdx>-1?'':'placeholder'}}">{{form.windWave || '请选择风浪'}}</text>
+          <text class="select-arrow">›</text>
+        </view>
+      </picker>
     </view>
 
     <view class="form-item">
@@ -127,9 +174,30 @@
     </view>
   </view>
 
+  <!-- 天气快照：新增时自动记录当前点位天气；编辑时展示该钓点已保存的天气记录（只读） -->
+  <view class="form-card" wx:if="{{pointWeather}}">
+    <view class="form-item">
+      <view class="label">
+        <text class="label-icon">🌤</text>
+        <text>当前点位天气（保存时自动记录）</text>
+      </view>
+      <view class="weather-snap">
+        <view class="weather-snap-main">
+          <view class="weather-snap-emoji">{{pointWeather.emoji || '🌤'}}</view>
+          <view class="weather-snap-info">
+            <view class="weather-snap-temp">{{pointWeather.temp || '--'}}°</view>
+            <view class="weather-snap-text">{{pointWeather.text || '--'}} · {{pointWeather.windDir || ''}}{{pointWeather.windScale || ''}} · 湿度{{pointWeather.humidity || '--'}}</view>
+          </view>
+        </view>
+        <view class="weather-snap-loading" wx:if="{{weatherFetching}}">天气获取中...</view>
+        <view class="weather-snap-time" wx:if="{{pointWeather.updateTime}}">记录于 {{pointWeather.updateTime}}</view>
+      </view>
+    </view>
+  </view>
+
   <view class="tip">带 * 为必填项，信息越详细越方便钓友找到钓点</view>
 
-  <!-- 鱼种多选面板 -->
+  <!-- 目标鱼种多选面板 -->
   <view class="mask" wx:if="{{showFishPanel}}" bindtap="closeFishPanel"></view>
   <view class="panel {{showFishPanel?'panel-show':''}}">
     <view class="panel-header">
@@ -137,19 +205,19 @@
       <text class="panel-close" bindtap="closeFishPanel">×</text>
     </view>
     <scroll-view scroll-y class="panel-body">
-      <view class="fish-option {{item.checked?'fish-option-active':''}}" wx:for="{{fishOptions}}" wx:key="value" data-value="{{item.value}}" bindtap="onFishToggle">
+      <view class="fish-option {{item.checked?'fish-option-active':''}}" wx:for="{{panelOptions}}" wx:key="value" data-value="{{item.value}}" bindtap="onFishToggle">
         <text>{{item.label}}</text>
         <view class="check">{{item.checked?'✓':''}}</view>
       </view>
     </scroll-view>
     <view class="panel-footer">
-      <button class="panel-btn" hover-class="btn-hover" bindtap="confirmFish">确定（已选 {{fishSelected.length}} 种）</button>
+      <button class="panel-btn" hover-class="btn-hover" bindtap="confirmFish">确定（已选 {{panelCount}} 种）</button>
     </view>
   </view>
 
   <!-- 提交 -->
   <view class="submit-bar">
-    <button class="btn-submit" hover-class="btn-hover" bindtap="submit">{{isEdit?'保存修改':'提交钓点'}}</button>
+    <button class="btn-submit" hover-class="btn-hover" bindtap="submit">提交钓点</button>
   </view>
 
   <!-- 自定义地图选点弹层：搜索 + 点击地图/十字选点 -->

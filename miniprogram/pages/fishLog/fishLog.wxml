@@ -1,0 +1,197 @@
+<view class="page">
+  <!-- 1. 顶部淡蓝装饰 -->
+  <view class="hero-bg"></view>
+
+  <!-- 2. 月度统计卡 -->
+  <view class="month-card">
+    <view class="month-row">
+      <view class="month-arrow" data-dir="prev" bindtap="onMonthShift">‹</view>
+      <view class="month-info">
+        <view class="month-title">{{currentMonthLabel}}</view>
+        <view class="month-sub">{{syncHint}}</view>
+      </view>
+      <view class="month-arrow" data-dir="next" bindtap="onMonthShift">›</view>
+    </view>
+
+    <view class="count-row">
+      <view class="count-main">
+        <view class="count-num">{{totalCount}}</view>
+        <view class="count-unit">条</view>
+      </view>
+      <view class="count-stats">
+        <view class="count-stat">
+          <view class="count-stat-label">出勤</view>
+          <view class="count-stat-value">{{attendanceCount}}次</view>
+        </view>
+        <view class="count-stat">
+          <view class="count-stat-label">放流率</view>
+          <view class="count-stat-value">{{releaseRate}}%</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 周柱图 -->
+    <view class="week-bars">
+      <view class="week-bar" wx:for="{{weekLabels}}" wx:key="*this">
+        <view class="bar-track">
+          <view class="bar-fill" style="height: {{weekly[index] && weeklyMax ? (weekly[index] / weeklyMax * 100) : 0}}%;"></view>
+        </view>
+        <view class="bar-num">{{weekly[index] || 0}}</view>
+        <view class="bar-label">{{item}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 3. 本月按位置 -->
+  <view class="location-card">
+    <view class="card-title">本月按位置</view>
+    <view class="card-sub">点击位置可筛选该月记录</view>
+    <view class="location-empty" wx:if="{{!pointStatsLoading && !pointGroups.length}}">
+      这个月还没有可统计的位置记录
+    </view>
+    <view class="location-list" wx:if="{{pointGroups.length}}">
+      <view class="location-item" wx:for="{{pointGroups}}" wx:key="pointId" data-index="{{index}}" bindtap="onPointGroupTap">
+        <view class="location-marker">
+          <view class="location-dot"></view>
+        </view>
+        <view class="location-main">
+          <view class="location-name">{{item.pointName}}</view>
+          <view class="location-meta">共 {{item.totalCount}} 条 · 放流率 {{item.releaseRate}}%</view>
+        </view>
+        <view class="location-arrow">›</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 4. 大蓝色按钮：记录一次鱼获 -->
+  <view class="add-btn" hover-class="add-btn-hover" bindtap="onAddCatchTap">
+    <text class="add-btn-icon">＋</text>
+    <text class="add-btn-text">记录一次鱼获</text>
+  </view>
+
+  <!-- 5. 常见鱼快速处理 -->
+  <view class="fish-card">
+    <view class="card-title-row">
+      <view class="card-title">常见鱼快速处理</view>
+      <view class="card-link">全部 {{commonFishCount}} 种 ›</view>
+    </view>
+    <view class="card-sub">点鱼种先看处理指南；记录鱼获仍用上方蓝色按钮</view>
+    <scroll-view scroll-x class="fish-scroll" enhanced show-scrollbar="{{false}}">
+      <view class="fish-list">
+        <view class="fish-item" wx:for="{{commonFish}}" wx:key="name" data-index="{{index}}" bindtap="onQuickTap">
+          <view class="fish-circle" style="background: {{item.bg}}">
+            <view class="fish-glyph">
+              <view class="fish-body" style="border-color: {{item.stroke}}"></view>
+              <view class="fish-tail" style="border-color: {{item.stroke}}"></view>
+            </view>
+          </view>
+          <view class="fish-name">{{item.name}}</view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 6. 最近记录 -->
+  <view class="recent-card">
+    <view class="recent-head">
+      <view class="recent-title">最近记录</view>
+      <view class="recent-toggle">
+        <view class="toggle-item {{viewKey==='list'?'toggle-active':''}}" data-key="list" bindtap="onViewChange">列表</view>
+        <view class="toggle-item {{viewKey==='calendar'?'toggle-active':''}}" data-key="calendar" bindtap="onViewChange">日历</view>
+      </view>
+    </view>
+    <view class="recent-tabs">
+      <view class="recent-tab {{rangeKey==='all'?'recent-tab-active':''}}" data-key="all" bindtap="onRangeChange">全部</view>
+      <view class="recent-tab {{rangeKey==='week'?'recent-tab-active':''}}" data-key="week" bindtap="onRangeChange">本周</view>
+      <view class="recent-tab {{rangeKey==='month'?'recent-tab-active':''}}" data-key="month" bindtap="onRangeChange">选中月</view>
+    </view>
+
+    <!-- 列表视图 -->
+    <view class="recent-list" wx:if="{{viewKey==='list'}}">
+      <view class="record-item" wx:for="{{records}}" wx:key="_id">
+        <view class="record-main">
+          <view class="record-fish">
+            <text class="record-fish-name">{{item.fishName}}</text>
+            <text class="record-fish-count">×{{item.count}}</text>
+          </view>
+          <view class="record-meta">
+            <text class="record-date">{{item.dateLabel}}</text>
+            <text class="record-dot">·</text>
+            <text class="record-week">{{item.weekLabel}}</text>
+            <text class="record-dot" wx:if="{{item.pointName}}">·</text>
+            <text class="record-point" wx:if="{{item.pointName}}">{{item.pointName}}</text>
+          </view>
+        </view>
+        <view class="record-tag {{item.isReleased ? 'tag-released' : 'tag-kept'}}">{{item.typeLabel}}</view>
+        <view class="record-del" data-id="{{item._id}}" bindtap="onRecordDelete">×</view>
+      </view>
+      <view class="record-empty" wx:if="{{!recordsLoading && !records.length}}">
+        <view class="empty-fish">
+          <view class="empty-fish-glyph">
+            <view class="fish-body" style="border-color: #c9cdd4"></view>
+            <view class="fish-tail" style="border-color: #c9cdd4"></view>
+          </view>
+        </view>
+        <view class="empty-text">暂无鱼护记录</view>
+        <view class="empty-btn" bindtap="onAddCatchTap">记录第一条</view>
+      </view>
+      <view class="record-loading" wx:if="{{recordsLoadingMore}}">加载中...</view>
+      <view class="record-end" wx:if="{{!hasMore && records.length}}">已经到底了</view>
+    </view>
+
+    <!-- 日历视图 -->
+    <view class="recent-calendar" wx:if="{{viewKey==='calendar'}}">
+      <view class="cal-row">
+        <view class="cal-week" wx:for="{{['一','二','三','四','五','六','日']}}" wx:key="*this">{{item}}</view>
+      </view>
+      <view class="cal-grid">
+        <view class="cal-cell cal-empty" wx:for="{{calendarLeadingEmpty}}" wx:key="*this"></view>
+        <view class="cal-cell" wx:for="{{calendarCells}}" wx:key="day">
+          <view class="cal-day">{{item.day}}</view>
+          <view class="cal-mark" wx:if="{{item.count}}">{{item.count}}</view>
+        </view>
+      </view>
+      <view class="cal-empty-tip" wx:if="{{!calendarCells.length}}">
+        <text>本月暂无鱼护记录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态：未登录时引导 -->
+  <view class="page-empty" wx:if="{{!loading && !isLoggedIn && !totalCount}}">
+    <view class="page-empty-text">登录后开启你的电子鱼护</view>
+    <view class="page-empty-btn" bindtap="onAddCatchTap">立即登录记录</view>
+  </view>
+
+  <!-- 7. 快速录入弹层 -->
+  <view class="mask" wx:if="{{showQuickAdd}}" bindtap="onQuickClose"></view>
+  <view class="panel {{showQuickAdd?'panel-show':''}}">
+    <view class="panel-header">
+      <text class="panel-title">快速记录鱼获</text>
+      <text class="panel-close" bindtap="onQuickClose">×</text>
+    </view>
+    <view class="panel-body">
+      <view class="quick-fish">
+        <view class="quick-fish-circle" style="background: {{quickAddFish.bg}}">
+          <view class="fish-glyph">
+            <view class="fish-body" style="border-color: #5a8a30"></view>
+            <view class="fish-tail" style="border-color: #5a8a30"></view>
+          </view>
+        </view>
+        <view class="quick-fish-name">{{quickAddFish.name}}</view>
+      </view>
+      <view class="quick-count-row">
+        <view class="quick-count-label">数量</view>
+        <view class="quick-count-control">
+          <view class="qc-btn" data-op="minus" bindtap="onQuickCountChange">－</view>
+          <view class="qc-num">{{quickAddCount}}</view>
+          <view class="qc-btn" data-op="plus" bindtap="onQuickCountChange">＋</view>
+        </view>
+      </view>
+      <view class="quick-tip">提示：「快速记录」只记鱼种和数量；详细数据可点击上方的「+ 记录一次鱼获」补全</view>
+    </view>
+    <view class="panel-footer">
+      <button class="panel-btn" hover-class="btn-hover" bindtap="onQuickConfirm">确认记录</button>
+    </view>
+  </view>
+</view>

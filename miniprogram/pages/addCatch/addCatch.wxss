@@ -1,0 +1,486 @@
+page {
+  background: #f5f7fa;
+}
+
+.page {
+  padding: 20rpx 24rpx 40rpx;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* 通用卡片 */
+.section,
+.info-card,
+.form-row,
+.location-section {
+  background: #fff;
+  border-radius: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.04);
+}
+
+/* ===== 添加鱼种 ===== */
+.section {
+  padding: 28rpx 0 28rpx 28rpx;
+}
+.section-header {
+  padding-right: 28rpx;
+  margin-bottom: 20rpx;
+}
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+.section-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1f2329;
+}
+.section-tag {
+  font-size: 22rpx;
+  color: #52c41a;
+  background: #f6ffed;
+  border: 1rpx solid #b7eb8f;
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+}
+.section-sub {
+  font-size: 24rpx;
+  color: #8a919f;
+  line-height: 1.5;
+}
+
+.fish-scroll {
+  width: 100%;
+}
+.fish-list {
+  display: inline-flex;
+  padding-right: 28rpx;
+}
+.fish-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 20rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 20rpx;
+  border: 2rpx solid transparent;
+  transition: background 0.2s;
+}
+.fish-item:last-child {
+  margin-right: 0;
+}
+.fish-active {
+  background: #fff;
+  border-color: #1677ff;
+  box-shadow: 0 4rpx 16rpx rgba(22, 119, 255, 0.12);
+}
+.fish-circle {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.fish-name {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #4e5969;
+  font-weight: 500;
+}
+.fish-active .fish-name {
+  color: #1677ff;
+  font-weight: 600;
+}
+
+/* 鱼图标（与 fishLog 一致） */
+.fish-glyph {
+  position: relative;
+  width: 56rpx;
+  height: 32rpx;
+}
+.fish-body {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44rpx;
+  height: 20rpx;
+  border: 4rpx solid;
+  border-radius: 50%;
+  border-right-color: transparent;
+  box-sizing: border-box;
+}
+.fish-tail {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 10rpx solid transparent;
+  border-bottom: 10rpx solid transparent;
+  border-left: 16rpx solid;
+}
+
+/* ===== 鱼种信息卡 ===== */
+.info-card {
+  display: flex;
+  padding: 28rpx;
+}
+.info-glyph {
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+.info-fish-circle {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+}
+.info-main {
+  flex: 1;
+  min-width: 0;
+}
+.info-name {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1f2329;
+  margin-bottom: 10rpx;
+}
+.info-desc {
+  font-size: 26rpx;
+  color: #4e5969;
+  line-height: 1.5;
+  margin-bottom: 10rpx;
+}
+.info-tip {
+  font-size: 22rpx;
+  color: #8a919f;
+  line-height: 1.5;
+}
+
+/* ===== 表单行 ===== */
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx;
+}
+.form-label {
+  display: flex;
+  flex-direction: column;
+}
+.form-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2329;
+  margin-bottom: 6rpx;
+}
+.form-sub {
+  font-size: 24rpx;
+  color: #8a919f;
+}
+.form-value {
+  display: flex;
+  align-items: center;
+  font-size: 28rpx;
+  color: #1f2329;
+  font-weight: 500;
+}
+.form-placeholder {
+  color: #c9cdd4;
+}
+.form-arrow {
+  margin-left: 10rpx;
+  color: #c9cdd4;
+  font-size: 32rpx;
+}
+
+/* 步进器 */
+.stepper {
+  display: flex;
+  align-items: center;
+  background: #f5f6f8;
+  border-radius: 16rpx;
+  height: 76rpx;
+}
+.step-btn {
+  width: 72rpx;
+  height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1677ff;
+}
+.step-btn:active {
+  background: #e6efff;
+  border-radius: 16rpx;
+}
+.step-num {
+  min-width: 80rpx;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1f2329;
+}
+.stepper-input {
+  padding: 0 8rpx;
+}
+.step-input {
+  width: 64rpx;
+  min-width: 64rpx;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1f2329;
+  background: transparent;
+}
+.step-unit {
+  font-size: 26rpx;
+  color: #8a919f;
+  margin-right: 12rpx;
+  margin-left: 4rpx;
+}
+
+/* 处理方式标签 */
+.handling-tag {
+  display: inline-block;
+  padding: 8rpx 22rpx;
+  border-radius: 28rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+.handling-released {
+  color: #52c41a;
+  background: #f6ffed;
+  border: 1rpx solid #b7eb8f;
+}
+.handling-kept {
+  color: #fa8c16;
+  background: #fff7e6;
+  border: 1rpx solid #ffd591;
+}
+
+/* ===== 加入本次出勤 ===== */
+.add-trip-btn {
+  margin: 32rpx 0;
+  background: #fff;
+  border: 2rpx dashed #1677ff;
+  border-radius: 24rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1677ff;
+  font-size: 32rpx;
+  font-weight: 700;
+  box-shadow: 0 4rpx 16rpx rgba(22, 119, 255, 0.08);
+}
+.add-trip-btn:active {
+  background: #f0f7ff;
+}
+.add-trip-btn-disabled {
+  opacity: 0.6;
+}
+.add-trip-icon {
+  margin-right: 10rpx;
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+/* ===== 位置 ===== */
+.location-section {
+  padding: 28rpx;
+}
+.location-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+.location-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2329;
+  margin-bottom: 6rpx;
+}
+.location-sub {
+  font-size: 24rpx;
+  color: #8a919f;
+}
+.location-switch {
+  transform: scale(0.86);
+  transform-origin: right center;
+}
+.location-tip {
+  font-size: 22rpx;
+  color: #8a919f;
+  line-height: 1.5;
+  margin-bottom: 20rpx;
+}
+.location-card {
+  display: flex;
+  align-items: flex-start;
+  background: #f5f6f8;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+}
+.location-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #fff;
+  color: #1677ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+.location-main {
+  flex: 1;
+  min-width: 0;
+}
+.location-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1f2329;
+  margin-bottom: 8rpx;
+}
+.location-address {
+  font-size: 24rpx;
+  color: #4e5969;
+  margin-bottom: 10rpx;
+  line-height: 1.4;
+}
+.location-meta {
+  display: inline-block;
+  font-size: 22rpx;
+  color: #52c41a;
+  background: #f6ffed;
+  padding: 4rpx 14rpx;
+  border-radius: 16rpx;
+}
+.location-empty {
+  font-size: 28rpx;
+  color: #8a919f;
+  line-height: 64rpx;
+}
+.location-actions {
+  display: flex;
+  gap: 16rpx;
+}
+.loc-action {
+  flex: 1;
+  text-align: center;
+  padding: 18rpx 0;
+  background: #f5f6f8;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  color: #4e5969;
+  font-weight: 500;
+}
+.loc-action:active {
+  background: #e6efff;
+}
+.loc-action-primary {
+  color: #1677ff;
+  background: #e6f4ff;
+}
+
+.safe-bottom {
+  height: calc(24rpx + env(safe-area-inset-bottom));
+}
+
+/* ===== 底部面板 ===== */
+.mask {
+  position: fixed;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+}
+.panel {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: #fff;
+  border-radius: 32rpx 32rpx 0 0;
+  z-index: 101;
+  padding: 28rpx 32rpx calc(28rpx + env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+.panel-show {
+  transform: translateY(0);
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+.panel-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #1f2329;
+}
+.panel-close {
+  font-size: 44rpx;
+  color: #9aa3af;
+  padding: 0 8rpx;
+  line-height: 1;
+}
+.panel-body {
+  max-height: 600rpx;
+}
+.panel-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26rpx 8rpx;
+  border-bottom: 1rpx solid #f2f3f5;
+  font-size: 30rpx;
+  color: #333;
+}
+.panel-option-active {
+  color: #1677ff;
+  font-weight: 600;
+}
+.panel-check {
+  width: 40rpx;
+  height: 40rpx;
+  border: 2rpx solid #c9cdd4;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 40rpx;
+  font-size: 26rpx;
+  color: #fff;
+  box-sizing: border-box;
+}
+.panel-option-active .panel-check {
+  background: #1677ff;
+  border-color: #1677ff;
+}
+
+.handling-option {
+  align-items: flex-start;
+}
+.handling-option-main {
+  display: flex;
+  flex-direction: column;
+}
+.handling-option-label {
+  font-size: 30rpx;
+  margin-bottom: 6rpx;
+}
+.handling-option-sub {
+  font-size: 24rpx;
+  color: #8a919f;
+}
